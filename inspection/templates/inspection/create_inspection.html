@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white d-flex align-items-center">
+                    <i class="fas fa-edit me-2"></i>
+                    <h3 class="card-title mb-0">Create Inspection</h3>
+                </div>
+                <div class="card-body">
+                    <!-- Display messages -->
+                    {% if messages %}
+                        <div class="alert-messages">
+                            {% for message in messages %}
+                                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <!-- Display form -->
+                    <form method="post" enctype="multipart/form-data" class="row g-3 needs-validation" novalidate>
+                        {% csrf_token %}
+                        <div class="col-md-6">
+                            <label for="branch" class="form-label">Branch</label>
+                            {{ form.branch|add_class:"form-control" }}
+                            {% if form.branch.errors %}
+                                <div class="text-danger small">{{ form.branch.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="saleman" class="form-label">Saleman</label>
+                            {{ form.saleman|add_class:"form-control" }}
+                            {% if form.saleman.errors %}
+                                <div class="text-danger small">{{ form.saleman.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="device_type" class="form-label">Device Type</label>
+                            {{ form.device_type|add_class:"form-control" }}
+                            {% if form.device_type.errors %}
+                                <div class="text-danger small">{{ form.device_type.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="SN" class="form-label">SN</label>
+                            {{ form.sn|add_class:"form-control" }}
+                            {% if form.sn.errors %}
+                                <div class="text-danger small">{{ form.sn.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-12">
+                            <label for="condition" class="form-label">Condition</label>
+                            {{ form.condition|add_class:"form-control" }}
+                            {% if form.condition.errors %}
+                                <div class="text-danger small">{{ form.condition.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-12">
+                            <label for="remarks" class="form-label">Remarks</label>
+                            {{ form.remarks|add_class:"form-control" }}
+                            {% if form.remarks.errors %}
+                                <div class="text-danger small">{{ form.remarks.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-12">
+                            <label for="image" class="form-label">Upload Image</label>
+                            {{ form.image|add_class:"form-control" }}
+                            {% if form.image.errors %}
+                                <div class="text-danger small">{{ form.image.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-12 text-center">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-paper-plane me-1"></i> Submit
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
