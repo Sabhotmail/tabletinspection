@@ -23,4 +23,6 @@ urlpatterns = [
     path('create/', views.create_inspection, name='create_inspection'),  # สร้างข้อมูลใหม่
     path('dashboard/', views.dashboard, name='dashboard'),
     path('delete/<int:inspection_id>/', delete_inspection, name='delete_inspection'),
+
+    path('detail/<int:pk>/', views.inspection_detail, name='inspection_detail'),
 ]

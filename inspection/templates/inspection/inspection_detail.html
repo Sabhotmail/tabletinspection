@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg">
+                <div class="card-header bg-info text-white">
+                    <h3 class="card-title mb-0">Inspection Detail</h3>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Device Information</h5>
+                    <p><strong>Branch:</strong> {{ inspection.branch }}</p>
+                    <p><strong>Saleman:</strong> {{ inspection.saleman }}</p>
+                    <p><strong>Device Type:</strong> {{ inspection.device_type }}</p>
+                    <p><strong>Serial Number (SN):</strong> {{ inspection.sn }}</p>
+                    <p><strong>Condition:</strong> {{ inspection.condition }}</p>
+                    <p><strong>Charger Status:</strong> {{ inspection.charger_status }}</p>
+                    {% if inspection.device_type == 'Tablet' %}
+                        <p><strong>Bag Status:</strong> {{ inspection.bag_status }}</p>
+                    {% endif %}
+                    <p><strong>Remarks:</strong> {{ inspection.remarks }}</p>
+                    <p><strong>Inspected At:</strong> {{ inspection.inspected_at }}</p>
+                    
+                    {% if inspection.image %}
+                        <p><strong>Image:</strong></p>
+                        <img src="{{ inspection.image.url }}" class="img-fluid" alt="Inspection Image">
+                    {% endif %}
+
+                    <h5 class="mt-4">Additional Images</h5>
+                    {% for img in inspection.images.all %}
+                        <img src="{{ img.image.url }}" class="img-thumbnail mb-2" style="max-width: 200px;" alt="Additional Image">
+                    {% empty %}
+                        <p>No additional images uploaded.</p>
+                    {% endfor %}
+
+                    <a href="{% url 'inspection_list' %}" class="btn btn-secondary mt-3">
+                        <i class="fas fa-arrow-left"></i> Back to List
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

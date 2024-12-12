@@ -137,6 +137,17 @@
             });
         });
     </script>
+    <script>
+        $(document).ready(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+        });
+    </script>
+    <script>
+        function showLoading(button) {
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+            button.disabled = true;
+        }        
+    </script>
 </body>
 
 </html>

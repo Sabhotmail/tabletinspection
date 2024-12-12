@@ -153,3 +153,9 @@ def delete_inspection(request, inspection_id):
         messages.success(request, "Inspection deleted successfully!")
         return redirect('inspection_list')
     return render(request, 'inspection/confirm_delete.html', {'inspection': inspection})
+
+
+@login_required
+def inspection_detail(request, pk):
+    inspection = get_object_or_404(DeviceInspection, pk=pk)
+    return render(request, 'inspection/inspection_detail.html', {'inspection': inspection})
