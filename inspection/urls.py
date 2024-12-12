@@ -2,7 +2,7 @@ from django.urls import path
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth import views as auth_views
 from . import views
-
+from .views import delete_inspection
 
 
 urlpatterns = [
@@ -22,4 +22,5 @@ urlpatterns = [
     path('list/', views.inspection_list, name='inspection_list'),  # รายการทั้งหมด
     path('create/', views.create_inspection, name='create_inspection'),  # สร้างข้อมูลใหม่
     path('dashboard/', views.dashboard, name='dashboard'),
+    path('delete/<int:inspection_id>/', delete_inspection, name='delete_inspection'),
 ]

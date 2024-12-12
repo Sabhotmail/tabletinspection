@@ -11,6 +11,11 @@
     <link href="{% static 'vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
     <link href="{% static 'css/sb-admin-2.min.css' %}" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" rel="stylesheet">
+
+    <!-- Include jQuery and DataTables -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 </head>
 
 <body id="page-top">
@@ -31,43 +36,25 @@
             <!-- Divider -->
             <hr class="sidebar-divider my-0">
 
-             <!-- Dashboard -->
-             <li class="nav-item">
+            <!-- Menu Items -->
+            <li class="nav-item">
                 <a class="nav-link" href="{% url 'dashboard' %}">
                     <i class="fas fa-fw fa-tachometer-alt"></i>
                     <span>Dashboard</span>
                 </a>
             </li>
-
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'inspection_list' %}">
                     <i class="fas fa-solid fa-list"></i>
                     <span>List Inspection</span>
                 </a>
             </li>
-
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'create_inspection' %}">
                     <i class="fas fa-plus-circle"></i>
                     <span>Create Inspection</span>
                 </a>
             </li>
-
-            <!-- Other Sections -->
-            <li class="nav-item">
-                <a class="nav-link" href="#">
-                    <i class="fas fa-fw fa-table"></i>
-                    <span>Reports</span>
-                </a>
-            </li>
-
-            <!-- Sidebar Divider -->
-            <hr class="sidebar-divider d-none d-md-block">
-
-            <!-- Sidebar Toggler -->
-            <div class="text-center d-none d-md-inline">
-                <button class="rounded-circle border-0" id="sidebarToggle"></button>
-            </div>
         </ul>
         <!-- End of Sidebar -->
 
@@ -79,25 +66,19 @@
 
                 <!-- Topbar -->
                 <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
-                    <!-- Sidebar Toggle -->
                     <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
                         <i class="fa fa-bars"></i>
                     </button>
 
-                    <!-- Topbar Navbar -->
                     <ul class="navbar-nav ml-auto">
-                        <!-- User Information -->
                         <li class="nav-item dropdown no-arrow">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <span class="mr-2 d-none d-lg-inline text-gray-600 small">
                                     {{ request.user.get_full_name|default:request.user.username }} 
-                                    - {{ request.user.branch.branchname|default:"No Branch" }}
                                 </span>
                                 <img class="img-profile rounded-circle" src="{% static 'img/undraw_profile.svg' %}">
                             </a>
-                            <!-- Dropdown -->
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
-                                <div class="dropdown-divider"></div>
                                 <form action="{% url 'logout' %}" method="post" style="display:inline;">
                                     {% csrf_token %}
                                     <button class="dropdown-item" type="submit">Logout</button>
@@ -111,7 +92,7 @@
                 <!-- Page Content -->
                 <div class="container-fluid">
                     {% block content %}
-                    <!-- Your Page Content Here -->
+                    <!-- Page-specific content goes here -->
                     {% endblock %}
                 </div>
                 <!-- End of Page Content -->
@@ -140,17 +121,22 @@
         <i class="fas fa-angle-up"></i>
     </a>
 
-    <!-- Scripts -->
-    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <!-- Additional Scripts -->
     <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
     <script src="{% static 'vendor/jquery-easing/jquery.easing.min.js' %}"></script>
     <script src="{% static 'js/sb-admin-2.min.js' %}"></script>
     <script>
         $(document).ready(function () {
-            $('#dataTable').DataTable(); // Initialize DataTable
+            console.log("Initializing DataTables...");
+            $('#inspectionTable').DataTable({
+                "pageLength": 10,
+                "lengthChange": true,
+                "ordering": true,
+                "searching": true,
+                "responsive": true
+            });
         });
     </script>
-    
 </body>
 
 </html>

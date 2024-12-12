@@ -13,7 +13,12 @@ from django.db.models.functions import TruncDate
 
 @login_required
 def inspection_list(request):
-    inspections = DeviceInspection.objects.filter(branch=request.user.branch)  # แสดงเฉพาะข้อมูลของ branch
+    # ตรวจสอบว่าผู้ใช้เป็น admin หรือไม่
+    if request.user.is_superuser:  
+        inspections = DeviceInspection.objects.all()  # Admin เห็นข้อมูลทุกสาขา
+    else:
+        inspections = DeviceInspection.objects.filter(branch=request.user.branch)  # ผู้ใช้ธรรมดาเห็นเฉพาะ branch ของตัวเอง
+    
     return render(request, 'inspection/inspection_list.html', {'inspections': inspections})
 
 
@@ -35,7 +40,7 @@ def create_inspection(request):
 @login_required
 def edit_inspection(request, pk):
     # ดึงข้อมูลที่ตรงกับ branch ของผู้ใช้
-    inspection = get_object_or_404(DeviceInspection, pk=pk, branch=request.user.branch)
+    inspection = get_object_or_404(DeviceInspection, pk=pk)
 
     if request.method == 'POST':
         form = DeviceInspectionForm(request.POST, request.FILES, instance=inspection, user=request.user)
@@ -138,3 +143,13 @@ def dashboard(request):
         'branch_stats': branch_stats,
     }
     return render(request, 'dashboard.html', context)
+
+
+@login_required
+def delete_inspection(request, inspection_id):
+    inspection = get_object_or_404(DeviceInspection, id=inspection_id)
+    if request.method == 'POST':
+        inspection.delete()
+        messages.success(request, "Inspection deleted successfully!")
+        return redirect('inspection_list')
+    return render(request, 'inspection/confirm_delete.html', {'inspection': inspection})

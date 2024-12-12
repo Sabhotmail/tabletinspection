@@ -1,75 +1,48 @@
 {% extends 'base.html' %}
-
 {% block content %}
-<div class="container-fluid">
-
-    <!-- Page Heading -->
-    <h1 class="h3 mb-2 text-gray-800">Inspection List</h1>
-    <p class="mb-4">This table displays the current inspection data. You can sort, filter, and search for specific items.</p>
-
-    <!-- DataTable Example -->
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Device Inspections</h6>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Branch</th>
-                            <th>Saleman</th>
-                            <th>Device Type</th>
-                            <th>SN</th>
-                            <th>Condition</th>
-                            <th>Remarks</th>
-                            <th>Image</th>
-                            <th>Inspected At</th>
-                            <th>Edit</th>
-                        </tr>
-                    </thead>
-                    {% comment %} <tfoot>
-                        <tr>
-                            <th>#</th>
-                            <th>Branch</th>
-                            <th>Device Type</th>
-                            <th>Condition</th>
-                            <th>Remarks</th>
-                            <th>Image</th>
-                            <th>Inspected At</th>
-                        </tr>
-                    </tfoot> {% endcomment %}
-                    <tbody>
-                        {% for inspection in inspections %}
-                        <tr>
-                            <td>{{ forloop.counter }}</td>
-                            <td>{{ inspection.branch.branchname }}</td>
-                            <td>{{ inspection.saleman }}</td>
-                            <td>{{ inspection.device_type }}</td>
-                            <td>{{ inspection.sn }}</td>
-                            <td>{{ inspection.condition }}</td>
-                            <td>{{ inspection.remarks|default:"N/A" }}</td>
-                            <td>
-                                {% if inspection.image %}
-                                <img src="{{ inspection.image.url }}" alt="Image" style="width: 50px; height: auto;">
-                                {% else %}
-                                No Image
-                                {% endif %}
-                            </td>
-                            <td>{{ inspection.inspected_at|date:"d M Y, H:i" }}</td>
-                            <td>
-                                <a href="{% url 'edit_inspection' inspection.id %}" class="btn btn-sm btn-warning">
-                                    <i class="fas fa-edit"></i> Edit
-                                </a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="h3 mb-4 text-gray-800">Inspection List</h1>
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white"><h6 class="m-0">Inspection Records</h6></div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table id="inspectionTable" class="table table-striped table-bordered" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Branch</th>
+                                    <th>Salesman</th>
+                                    <th>Device Type</th>
+                                    <th>SN</th>
+                                    <th>Condition</th>
+                                    <th>Inspection Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for inspection in inspections %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ inspection.branch.branchname }}</td>
+                                    <td>{{ inspection.saleman.salemanname }}</td>
+                                    <td>{{ inspection.device_type }}</td>
+                                    <td>{{ inspection.sn }}</td>
+                                    <td>{{ inspection.condition }}</td>
+                                    <td>{{ inspection.inspected_at|date:"Y-m-d H:i" }}</td>
+                                    <td>
+                                        <a href="{% url 'edit_inspection' inspection.id %}" class="btn btn-sm btn-warning">Edit</a>
+                                        <a href="{% url 'delete_inspection' inspection.id %}" class="btn btn-sm btn-danger">Delete</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-
 </div>
 {% endblock %}
