@@ -2,7 +2,7 @@ from django.urls import path
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth import views as auth_views
 from . import views
-from .views import delete_inspection
+from .views import delete_inspection, user_profile
 
 
 urlpatterns = [
@@ -24,4 +24,8 @@ urlpatterns = [
     path('delete/<int:inspection_id>/', delete_inspection, name='delete_inspection'),
 
     path('detail/<int:pk>/', views.inspection_detail, name='inspection_detail'),
+    path('profile/', user_profile, name='user_profile'),
+
+    path('password_change/', auth_views.PasswordChangeView.as_view(template_name='password_change.html'), name='password_change'),
+    path('password_change/done/', auth_views.PasswordChangeDoneView.as_view(template_name='password_change_done.html'), name='password_change_done'),
 ]

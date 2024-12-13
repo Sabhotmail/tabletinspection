@@ -26,7 +26,7 @@
         <!-- Sidebar -->
         <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
             <!-- Sidebar - Brand -->
-            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{% url 'dashboard' %}">
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{% url 'inspection_list' %}">
                 <div class="sidebar-brand-icon">
                     <i class="fas fa-laugh-wink"></i>
                 </div>
@@ -38,10 +38,12 @@
 
             <!-- Menu Items -->
             <li class="nav-item">
+                {% if request.user.is_superuser or request.user.is_staff %}
                 <a class="nav-link" href="{% url 'dashboard' %}">
                     <i class="fas fa-fw fa-tachometer-alt"></i>
                     <span>Dashboard</span>
                 </a>
+                {% endif %}
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'inspection_list' %}">
@@ -74,14 +76,22 @@
                         <li class="nav-item dropdown no-arrow">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <span class="mr-2 d-none d-lg-inline text-gray-600 small">
-                                    {{ request.user.get_full_name|default:request.user.username }} 
+                                    {{ request.user.get_full_name|default:request.user.username }} - {{ request.user.branch.branchname|default:"Not Assigned" }} 
                                 </span>
                                 <img class="img-profile rounded-circle" src="{% static 'img/undraw_profile.svg' %}">
                             </a>
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
+                                <a class="dropdown-item" href="{% url 'user_profile' %}">
+                                    <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    Profile
+                                </a>
+                                <div class="dropdown-divider"></div>
                                 <form action="{% url 'logout' %}" method="post" style="display:inline;">
                                     {% csrf_token %}
-                                    <button class="dropdown-item" type="submit">Logout</button>
+                                    <button class="dropdown-item" type="submit">
+                                        <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                                        Logout
+                                    </button>
                                 </form>
                             </div>
                         </li>

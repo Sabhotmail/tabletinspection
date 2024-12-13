@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">Profile</h1>
+    <div class="card shadow">
+        <div class="card-body">
+            <p><strong>Username:</strong> {{ user.username }}</p>
+            <p><strong>Full Name:</strong> {{ user.get_full_name }}</p>
+            <p><strong>Email:</strong> {{ user.email }}</p>
+            <p><strong>Branch:</strong> {{ user.branch.branchname|default:"Not Assigned" }}</p>
+        </div>
+    </div>
+    <a href="{% url 'password_change' %}" class="btn btn-primary mt-3">Change Password</a>
+</div>
+{% endblock %}

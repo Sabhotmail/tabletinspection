@@ -148,11 +148,10 @@ EMAIL_HOST_USER = 'noreply@siripro.co.th'  # อีเมล Office 365 ขอ�
 EMAIL_HOST_PASSWORD = 'S1r1Pr0@m1n'  # รหัสผ่านของอีเมล
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
-LOGIN_REDIRECT_URL = '/dashboard/'
+LOGIN_REDIRECT_URL = '/list/'
 LOGOUT_REDIRECT_URL = ''
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
 
 
 

@@ -11,6 +11,8 @@ from django.db.models.functions import TruncDate
 
 
 
+
+
 @login_required
 def inspection_list(request):
     # ตรวจสอบว่าผู้ใช้เป็น admin หรือไม่
@@ -144,3 +146,7 @@ def delete_inspection(request, inspection_id):
 def inspection_detail(request, pk):
     inspection = get_object_or_404(DeviceInspection, pk=pk)
     return render(request, 'inspection/inspection_detail.html', {'inspection': inspection})
+
+@login_required
+def user_profile(request):
+    return render(request, 'user_profile.html', {'user': request.user})
