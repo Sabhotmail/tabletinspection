@@ -37,21 +37,6 @@ def create_inspection(request):
         form = DeviceInspectionForm(user=request.user)
     return render(request, 'inspection/create_inspection.html', {'form': form})
 
-@login_required
-def edit_inspection(request, pk):
-    # ดึงข้อมูลที่ตรงกับ branch ของผู้ใช้
-    inspection = get_object_or_404(DeviceInspection, pk=pk)
-
-    if request.method == 'POST':
-        form = DeviceInspectionForm(request.POST, request.FILES, instance=inspection, user=request.user)
-        if form.is_valid():
-            inspection = form.save(commit=False)
-            inspection.save()
-            return redirect('inspection_list')  # เปลี่ยน URL นี้ตามต้องการ
-    else:
-        form = DeviceInspectionForm(instance=inspection, user=request.user)
-
-    return render(request, 'inspection/edit_inspection.html', {'form': form, 'inspection': inspection})
 
 def register(request):
     if request.method == 'POST':

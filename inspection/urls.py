@@ -18,7 +18,6 @@ urlpatterns = [
     path('password_reset_complete/', auth_views.PasswordResetCompleteView.as_view(
         template_name='password_reset_complete.html'), name='password_reset_complete'),
     # path('register/', views.register, name='register'),
-    path('edit/<int:pk>/', views.edit_inspection, name='edit_inspection'),  # เส้นทางสำหรับหน้าแก้ไข
     path('list/', views.inspection_list, name='inspection_list'),  # รายการทั้งหมด
     path('create/', views.create_inspection, name='create_inspection'),  # สร้างข้อมูลใหม่
     path('dashboard/', views.dashboard, name='dashboard'),

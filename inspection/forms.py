@@ -6,35 +6,49 @@ from django.core.exceptions import ValidationError
 class DeviceInspectionForm(forms.ModelForm):
     class Meta:
         model = DeviceInspection
-        fields = ['branch', 'saleman', 'device_type', 'sn', 'condition', 'remarks', 'image']
+        fields = [
+            'branch', 
+            'saleman', 
+            'device_type', 
+            'sn', 
+            'condition', 
+            'charger_status_tablet',  # สถานะสายชาร์จ Tablet
+            'charger_status_printer',  # สถานะสายชาร์จ Printer
+            'bag_status',  # สถานะกระเป๋า
+            'tablet_image', 
+            'charger_image_tablet', 
+            'charger_image_printer', 
+            'bag_image',
+            'printer_image',
+            'remarks',
+        ]
 
     def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user', None)  # ดึงข้อมูล user ที่ส่งเข้ามาใน form
-        print(f"User passed to form: {user}")
+        user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
 
-        if user:
-            if user.is_superuser:
-                # ถ้าเป็น admin ให้เห็นทุก branch และ saleman
-                print("Admin detected, showing all branches and salemen.")
-                self.fields['branch'].queryset = Branch.objects.all()
-                self.fields['saleman'].queryset = Saleman.objects.filter(status='active',)  # เฉพาะ Saleman ที่ active
-            elif user.branch:
-                # ถ้าไม่ใช่ admin ให้กรองตาม branch ของ user
-                print(f"Filtering Branch for user: {user.branch}")
-                self.fields['branch'].queryset = Branch.objects.filter(id=user.branch.id)
-                self.fields['saleman'].queryset = Saleman.objects.filter(branch=user.branch, status='active')
-            else:
-                # ถ้า user ไม่มี branch
-                print("User has no branch or is not logged in.")
-                self.fields['branch'].queryset = Branch.objects.none()
-                self.fields['saleman'].queryset = Saleman.objects.none()
+        # Filter branch and saleman fields based on user
+        if user and user.branch:
+            self.fields['branch'].queryset = Branch.objects.filter(id=user.branch.id)
+            self.fields['saleman'].queryset = Saleman.objects.filter(branch=user.branch, status='active')
+        else:
+            self.fields['branch'].queryset = Branch.objects.none()
+            self.fields['saleman'].queryset = Saleman.objects.none()
 
-        def clean_sn(self):
-            sn = self.cleaned_data['sn']
-            if DeviceInspection.objects.filter(sn=sn).exists():
-                raise forms.ValidationError("This Serial Number (SN) already exists.")
-            return sn
+    def clean(self):
+        cleaned_data = super().clean()
+
+        # Prevent changes to branch, device_type, and sn
+        if self.instance.pk:  # Check if this is an update
+            if cleaned_data.get('branch') != self.instance.branch:
+                raise ValidationError("Branch cannot be changed.")
+            if cleaned_data.get('device_type') != self.instance.device_type:
+                raise ValidationError("Device Type cannot be changed.")
+            if cleaned_data.get('sn') != self.instance.sn:
+                raise ValidationError("Serial Number (SN) cannot be changed.")
+
+        return cleaned_data
+
 
 
 class CustomUserCreationForm(UserCreationForm):

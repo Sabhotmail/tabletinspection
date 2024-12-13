@@ -35,14 +35,34 @@ class DeviceInspection(models.Model):
         ('ชำรุด', 'ชำรุด'),
     ]
     
-    branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
-    saleman = models.ForeignKey(Saleman, on_delete=models.SET_NULL, null=True, blank=True)  # เชื่อมกับ Saleman
+    branch = models.ForeignKey('Branch', on_delete=models.CASCADE)
+    saleman = models.ForeignKey('Saleman', on_delete=models.SET_NULL, null=True, blank=True)
     device_type = models.CharField(max_length=50, choices=[('Tablet', 'Tablet'), ('Printer', 'Printer')])
-    sn = models.CharField(max_length=100,null=True,blank=True,unique=True)  # Serial Number
-    condition = models.CharField(max_length=10, choices=CONDITION_CHOICES)  # ใช้ choices
+    sn = models.CharField(max_length=100, unique=True, blank=True, null=True)
+    condition = models.CharField(max_length=10, choices=CONDITION_CHOICES)
     remarks = models.TextField(blank=True, null=True)
-    image = models.ImageField(upload_to='uploads/', blank=True, null=True)
     inspected_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return f"{self.branch} - {self.device_type} ({self.condition})"
+    # Charger and Bag
+    charger_status_tablet = models.CharField(
+        max_length=10, choices=CONDITION_CHOICES, default='ปกติ', verbose_name="Tablet Charger Status"
+    )
+    charger_status_printer = models.CharField(
+        max_length=10, choices=CONDITION_CHOICES, default='ปกติ', verbose_name="Printer Charger Status"
+    )
+    bag_status = models.CharField(
+        max_length=10, choices=CONDITION_CHOICES, default='ปกติ', blank=True, null=True, verbose_name="Bag Status"
+    )
+
+    # Images
+    tablet_image = models.ImageField(upload_to='uploads/tablet_images/', blank=True, null=True)
+    charger_image_tablet = models.ImageField(upload_to='uploads/charger_images/', blank=True, null=True)
+    charger_image_printer = models.ImageField(upload_to='uploads/charger_images/', blank=True, null=True)
+    bag_image = models.ImageField(upload_to='uploads/bag_images/', blank=True, null=True)
+    printer_image = models.ImageField(upload_to='uploads/printer_images/', blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        # Clear bag_status if device_type is not Tablet
+        if self.device_type != 'Tablet':
+            self.bag_status = None
+        super().save(*args, **kwargs)

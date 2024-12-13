@@ -148,6 +148,33 @@
             button.disabled = true;
         }        
     </script>
+    
+    <!-- JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const deviceTypeField = document.getElementById('id_device_type');
+            const tabletFields = document.querySelectorAll('.tablet-only');
+            const printerFields = document.querySelectorAll('.printer-only');
+
+            function toggleFields() {
+                const isTablet = deviceTypeField.value === 'Tablet';
+                const isPrinter = deviceTypeField.value === 'Printer';
+
+                // Toggle visibility of tablet-related fields
+                tabletFields.forEach(field => {
+                    field.style.display = isTablet ? '' : 'none';
+                });
+
+                // Toggle visibility of printer-related fields
+                printerFields.forEach(field => {
+                    field.style.display = isPrinter ? '' : 'none';
+                });
+            }
+
+            deviceTypeField.addEventListener('change', toggleFields);
+            toggleFields();  // Initial call
+        });
+    </script>
 </body>
 
 </html>

@@ -2,40 +2,71 @@
 {% block content %}
 <div class="container mt-5">
     <div class="row justify-content-center">
-        <div class="col-md-8">
+        <div class="col-lg-8">
             <div class="card shadow-lg">
-                <div class="card-header bg-info text-white">
-                    <h3 class="card-title mb-0">Inspection Detail</h3>
+                <div class="card-header bg-info text-white d-flex align-items-center">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <h3 class="card-title mb-0">Inspection Details</h3>
                 </div>
                 <div class="card-body">
-                    <h5 class="card-title">Device Information</h5>
-                    <p><strong>Branch:</strong> {{ inspection.branch }}</p>
-                    <p><strong>Saleman:</strong> {{ inspection.saleman }}</p>
-                    <p><strong>Device Type:</strong> {{ inspection.device_type }}</p>
-                    <p><strong>Serial Number (SN):</strong> {{ inspection.sn }}</p>
-                    <p><strong>Condition:</strong> {{ inspection.condition }}</p>
-                    <p><strong>Charger Status:</strong> {{ inspection.charger_status }}</p>
-                    {% if inspection.device_type == 'Tablet' %}
+                    <!-- Branch Information -->
+                    <div class="mb-4">
+                        <h5 class="text-primary">Branch Information</h5>
+                        <p><strong>Branch:</strong> {{ inspection.branch }}</p>
+                        <p><strong>Saleman:</strong> {{ inspection.saleman }}</p>
+                    </div>
+
+                    <!-- Device Information -->
+                    <div class="mb-4">
+                        <h5 class="text-primary">Device Information</h5>
+                        <p><strong>Device Type:</strong> {{ inspection.device_type }}</p>
+                        <p><strong>Serial Number (SN):</strong> {{ inspection.sn }}</p>
+                        <p><strong>Condition:</strong> {{ inspection.condition }}</p>
+                        {% if inspection.tablet_image %}
+                        <p><strong>Tablet Image:</strong></p>
+                        <img src="{{ inspection.tablet_image.url }}" class="img-fluid rounded" alt="Tablet Image">
+                        {% endif %}
+                    </div>
+
+                    <!-- Accessory Information -->
+                    <div class="mb-4">
+                        <h5 class="text-primary">Accessory Information</h5>
+                        <p><strong>Tablet Charger Status:</strong> {{ inspection.charger_status_tablet }}</p>
+                        {% if inspection.charger_image_tablet %}
+                        <p><strong>Tablet Charger Image:</strong></p>
+                        <img src="{{ inspection.charger_image_tablet.url }}" class="img-fluid rounded" alt="Tablet Charger Image">
+                        {% endif %}
+                        
+                        {% if inspection.device_type == "Printer" %}
+                        <p><strong>Printer Charger Status:</strong> {{ inspection.charger_status_printer }}</p>
+                        {% if inspection.charger_image_printer %}
+                        <p><strong>Printer Charger Image:</strong></p>
+                        <img src="{{ inspection.charger_image_printer.url }}" class="img-fluid rounded" alt="Printer Charger Image">
+                        {% endif %}
+                        {% endif %}
+                        
+                        {% if inspection.device_type == "Tablet" %}
                         <p><strong>Bag Status:</strong> {{ inspection.bag_status }}</p>
-                    {% endif %}
-                    <p><strong>Remarks:</strong> {{ inspection.remarks }}</p>
-                    <p><strong>Inspected At:</strong> {{ inspection.inspected_at }}</p>
-                    
-                    {% if inspection.image %}
-                        <p><strong>Image:</strong></p>
-                        <img src="{{ inspection.image.url }}" class="img-fluid" alt="Inspection Image">
-                    {% endif %}
+                        {% if inspection.bag_image %}
+                        <p><strong>Bag Image:</strong></p>
+                        <img src="{{ inspection.bag_image.url }}" class="img-fluid rounded" alt="Bag Image">
+                        {% endif %}
+                        {% endif %}
+                    </div>
 
-                    <h5 class="mt-4">Additional Images</h5>
-                    {% for img in inspection.images.all %}
-                        <img src="{{ img.image.url }}" class="img-thumbnail mb-2" style="max-width: 200px;" alt="Additional Image">
-                    {% empty %}
-                        <p>No additional images uploaded.</p>
-                    {% endfor %}
+                    <!-- Additional Information -->
+                    <div class="mb-4">
+                        <h5 class="text-primary">Additional Information</h5>
+                        <p><strong>Remarks:</strong> {{ inspection.remarks }}</p>
+                        <p><strong>Inspected At:</strong> {{ inspection.inspected_at }}</p>
+                    </div>
 
-                    <a href="{% url 'inspection_list' %}" class="btn btn-secondary mt-3">
-                        <i class="fas fa-arrow-left"></i> Back to List
-                    </a>
+                    <!-- Back Button -->
+                    <div class="text-center">
+                        <a href="{% url 'inspection_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i> Back to List
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>

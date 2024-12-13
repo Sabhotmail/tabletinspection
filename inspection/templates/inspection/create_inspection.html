@@ -3,66 +3,120 @@
 {% block content %}
 <div class="container mt-5">
     <div class="row justify-content-center">
-        <div class="col-md-8">
+        <div class="col-lg-10">
             <div class="card shadow-lg">
                 <div class="card-header bg-primary text-white d-flex align-items-center">
                     <i class="fas fa-edit me-2"></i>
                     <h3 class="card-title mb-0">Create Inspection</h3>
                 </div>
                 <div class="card-body">
-                    <!-- Display form -->
-                    <form method="post" enctype="multipart/form-data" class="row g-3 needs-validation" novalidate>
+                    <!-- Form -->
+                    <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
                         {% csrf_token %}
-                        <div class="col-md-6">
-                            <label for="branch" class="form-label">Branch</label>
-                            {{ form.branch|add_class:"form-control" }}
-                            {% if form.branch.errors %}
-                                <div class="text-danger small">{{ form.branch.errors|join:", " }}</div>
-                            {% endif %}
+                        
+                        <!-- Branch and Saleman -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">Branch Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="branch" class="form-label">Branch</label>
+                                        {{ form.branch|add_class:"form-control" }}
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="saleman" class="form-label">Saleman</label>
+                                        {{ form.saleman|add_class:"form-control" }}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-md-6">
-                            <label for="saleman" class="form-label">Saleman</label>
-                            {{ form.saleman|add_class:"form-control" }}
-                            {% if form.saleman.errors %}
-                                <div class="text-danger small">{{ form.saleman.errors|join:", " }}</div>
-                            {% endif %}
+
+                        <!-- Device Information -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">Device Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="device_type" class="form-label">Device Type</label>
+                                        {{ form.device_type|add_class:"form-control" }}
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="sn" class="form-label">Serial Number (SN)</label>
+                                        {{ form.sn|add_class:"form-control" }}
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="condition" class="form-label">Device Condition</label>
+                                        {{ form.condition|add_class:"form-control" }}
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="tablet_image" class="form-label">Tablet Image</label>
+                                        {{ form.tablet_image|add_class:"form-control" }}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-md-6">
-                            <label for="device_type" class="form-label">Device Type</label>
-                            {{ form.device_type|add_class:"form-control" }}
-                            {% if form.device_type.errors %}
-                                <div class="text-danger small">{{ form.device_type.errors|join:", " }}</div>
-                            {% endif %}
+
+                        <!-- Accessory Information -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">Accessory Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <!-- Tablet Charger -->
+                                    <div class="col-md-6 mb-3 tablet-only">
+                                        <label for="charger_status_tablet" class="form-label">Tablet Charger Status</label>
+                                        {{ form.charger_status_tablet|add_class:"form-control" }}
+                                    </div>
+                                    <div class="col-md-6 mb-3 tablet-only">
+                                        <label for="charger_image_tablet" class="form-label">Tablet Charger Image</label>
+                                        {{ form.charger_image_tablet|add_class:"form-control" }}
+                                    </div>
+
+                                    <!-- Printer Charger -->
+                                    <div class="col-md-6 mb-3 printer-only">
+                                        <label for="charger_status_printer" class="form-label">Printer Charger Status</label>
+                                        {{ form.charger_status_printer|add_class:"form-control" }}
+                                    </div>
+                                    <div class="col-md-6 mb-3 printer-only">
+                                        <label for="charger_image_printer" class="form-label">Printer Charger Image</label>
+                                        {{ form.charger_image_printer|add_class:"form-control" }}
+                                    </div>
+
+                                    <!-- Bag -->
+                                    <div class="col-md-6 mb-3 tablet-only">
+                                        <label for="bag_status" class="form-label">Bag Status</label>
+                                        {{ form.bag_status|add_class:"form-control" }}
+                                    </div>
+                                    <div class="col-md-6 mb-3 tablet-only">
+                                        <label for="bag_image" class="form-label">Bag Image</label>
+                                        {{ form.bag_image|add_class:"form-control" }}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-md-6">
-                            <label for="SN" class="form-label">SN</label>
-                            {{ form.sn|add_class:"form-control" }}
-                            {% if form.sn.errors %}
-                                <div class="text-danger small">{{ form.sn.errors|join:", " }}</div>
-                            {% endif %}
+
+                        <!-- Additional Information -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">Additional Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-12 mb-3">
+                                        <label for="remarks" class="form-label">Remarks</label>
+                                        {{ form.remarks|add_class:"form-control" }}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-md-12">
-                            <label for="condition" class="form-label">Condition</label>
-                            {{ form.condition|add_class:"form-control" }}
-                            {% if form.condition.errors %}
-                                <div class="text-danger small">{{ form.condition.errors|join:", " }}</div>
-                            {% endif %}
-                        </div>
-                        <div class="col-md-12">
-                            <label for="remarks" class="form-label">Remarks</label>
-                            {{ form.remarks|add_class:"form-control" }}
-                            {% if form.remarks.errors %}
-                                <div class="text-danger small">{{ form.remarks.errors|join:", " }}</div>
-                            {% endif %}
-                        </div>
-                        <div class="col-md-12">
-                            <label for="image" class="form-label">Upload Image</label>
-                            {{ form.image|add_class:"form-control" }}
-                            {% if form.image.errors %}
-                                <div class="text-danger small">{{ form.image.errors|join:", " }}</div>
-                            {% endif %}
-                        </div>
-                        <div class="col-12 text-center">
+
+                        <!-- Submit Button -->
+                        <div class="text-center">
                             <button type="submit" class="btn btn-success btn-lg">
                                 <i class="fas fa-paper-plane me-1"></i> Submit
                             </button>
@@ -73,4 +127,6 @@
         </div>
     </div>
 </div>
+
+
 {% endblock %}
