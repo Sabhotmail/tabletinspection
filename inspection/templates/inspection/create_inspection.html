@@ -5,11 +5,17 @@
     <div class="row justify-content-center">
         <div class="col-lg-10">
             <div class="card shadow-lg">
+                {% if schedule %}
                 <div class="card-header bg-primary text-white d-flex align-items-center">
                     <i class="fas fa-edit me-2"></i>
                     <h3 class="card-title mb-0">Create Inspection</h3>
                 </div>
                 <div class="card-body">
+                    <p class="text-success">Schedule Active: 
+                        {{ schedule.start_time|date:"Y-m-d H:i" }} - 
+                        {{ schedule.end_time|date:"Y-m-d H:i" }}
+                    </p>
+
                     <!-- Form -->
                     <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
                         {% csrf_token %}
@@ -52,7 +58,7 @@
                                         <label for="condition" class="form-label">Device Condition</label>
                                         {{ form.condition|add_class:"form-control" }}
                                     </div>
-                                    <div class="col-md-6 mb-3">
+                                    <div class="col-md-6 mb-3 tablet-only">
                                         <label for="tablet_image" class="form-label">Tablet Image</label>
                                         {{ form.tablet_image|add_class:"form-control" }}
                                     </div>
@@ -123,10 +129,14 @@
                         </div>
                     </form>
                 </div>
+                {% else %}
+                <div class="alert alert-warning m-3">
+                    <h5>Form Unavailable</h5>
+                    The inspection form is not available at this time. Please check the schedule.
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
 </div>
-
-
 {% endblock %}

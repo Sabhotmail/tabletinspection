@@ -66,3 +66,16 @@ class DeviceInspection(models.Model):
         if self.device_type != 'Tablet':
             self.bag_status = None
         super().save(*args, **kwargs)
+
+class InspectionSchedule(models.Model):
+    start_time = models.DateTimeField()  # เวลาเริ่มต้น
+    end_time = models.DateTimeField()    # เวลาสิ้นสุด
+    description = models.TextField(blank=True, null=True)
+
+    def is_active(self):
+        """ตรวจสอบว่าตารางเวลาอยู่ในช่วงเวลาหรือไม่"""
+        from django.utils.timezone import now
+        return self.start_time <= now() <= self.end_time
+
+    def __str__(self):
+        return f"Schedule: {self.start_time} - {self.end_time}"

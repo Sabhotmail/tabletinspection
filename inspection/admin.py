@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as DefaultUserAdmin
-from .models import User, Branch, DeviceInspection, Saleman
+from .models import User, Branch, DeviceInspection, Saleman, InspectionSchedule
 from django.utils.html import format_html
 
 @admin.register(Branch)
@@ -61,3 +61,8 @@ class UserAdmin(DefaultUserAdmin):
             'fields': ('username', 'email', 'password1', 'password2', 'branch', 'is_staff', 'is_active'),
         }),
     )
+
+@admin.register(InspectionSchedule)
+class InspectionScheduleAdmin(admin.ModelAdmin):
+    list_display = ('start_time', 'end_time', 'description')
+    list_filter = ('start_time', 'end_time')

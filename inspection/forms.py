@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from .models import DeviceInspection, User, Branch, Saleman
+from .models import DeviceInspection, User, Branch, Saleman, InspectionSchedule
 from django.core.exceptions import ValidationError
 
 class DeviceInspectionForm(forms.ModelForm):
@@ -55,3 +55,12 @@ class CustomUserCreationForm(UserCreationForm):
     class Meta:
         model = User
         fields = ['username', 'email', 'password1', 'password2', 'branch']
+
+class InspectionScheduleForm(forms.ModelForm):
+    class Meta:
+        model = InspectionSchedule
+        fields = ['start_time', 'end_time']
+        widgets = {
+            'start_time': forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
+            'end_time': forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
+        }

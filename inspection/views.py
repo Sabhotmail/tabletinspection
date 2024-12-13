@@ -3,11 +3,13 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView
-from .models import DeviceInspection,Saleman, Branch
-from .forms import DeviceInspectionForm, CustomUserCreationForm
+from .models import DeviceInspection,Saleman, Branch, InspectionSchedule
+from .forms import DeviceInspectionForm, CustomUserCreationForm,InspectionScheduleForm
 from django.contrib import messages
 from django.db.models import Count, Q
 from django.db.models.functions import TruncDate
+from django.utils.timezone import now
+
 
 
 
@@ -27,17 +29,39 @@ def inspection_list(request):
 
 @login_required
 def create_inspection(request):
+    # เก็บเวลาปัจจุบัน
+    current_time = now()
+    print(f"Current time: {current_time}")
+
+    # ตรวจสอบตารางเวลาปัจจุบัน
+    schedule = InspectionSchedule.objects.filter(
+        start_time__lte=current_time,
+        end_time__gte=current_time
+    ).first()
+
+    if not schedule:
+        print("No valid schedule found!")
+        messages.error(
+            request, 
+            "The inspection form is currently closed. Please try again during the scheduled period."
+        )
+        return redirect('inspection_list')
+
+    # พิมพ์ Debug ตารางเวลา
+    print(f"Schedule found: Start - {schedule.start_time}, End - {schedule.end_time}")
+
     if request.method == 'POST':
         form = DeviceInspectionForm(request.POST, request.FILES, user=request.user)
         if form.is_valid():
             form.save()
             messages.success(request, "Inspection created successfully!")
-            return redirect('inspection_list')  # เปลี่ยน URL ไปยังหน้าที่ต้องการหลังบันทึก
+            return redirect('inspection_list')
         else:
             messages.error(request, "There was an error with your submission. Please check the form.")
     else:
         form = DeviceInspectionForm(user=request.user)
-    return render(request, 'inspection/create_inspection.html', {'form': form})
+
+    return render(request, 'inspection/create_inspection.html', {'form': form, 'schedule': schedule })
 
 
 def register(request):
@@ -150,3 +174,35 @@ def inspection_detail(request, pk):
 @login_required
 def user_profile(request):
     return render(request, 'user_profile.html', {'user': request.user})
+
+def schedule_view(request):
+    # ดึงข้อมูล Schedule ทั้งหมด
+    schedules = InspectionSchedule.objects.all().order_by('-end_time')  # เรียงลำดับจากเวลาล่าสุด
+    latest_schedule = schedules.first()  # ดึงตารางล่าสุด
+
+    # แปลงข้อมูลเป็น JSON เพื่อส่งให้ JavaScript
+    events = [
+    {
+        "title": f"{schedule.start_time.strftime('%H:%M')} - {schedule.end_time.strftime('%H:%M')}",
+        "start": schedule.start_time.isoformat(),
+        "end": schedule.end_time.isoformat(),
+        "description": f"Inspection from {schedule.start_time.strftime('%Y-%m-%d %H:%M')} to {schedule.end_time.strftime('%Y-%m-%d %H:%M')}"
+    }
+    for schedule in schedules
+    ]
+    context = {
+        "events": events,
+        "latest_schedule": latest_schedule,
+    }
+    return render(request, 'inspection/schedule.html', context)
+
+
+def add_schedule(request):
+    if request.method == 'POST':
+        form = InspectionScheduleForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('schedule')  # กลับไปยังหน้าปฏิทิน
+    else:
+        form = InspectionScheduleForm()
+    return render(request, 'inspection/add_schedule.html', {'form': form})

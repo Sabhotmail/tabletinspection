@@ -2,7 +2,7 @@ from django.urls import path
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth import views as auth_views
 from . import views
-from .views import delete_inspection, user_profile
+from .views import delete_inspection, user_profile, schedule_view
 
 
 urlpatterns = [
@@ -28,4 +28,7 @@ urlpatterns = [
 
     path('password_change/', auth_views.PasswordChangeView.as_view(template_name='password_change.html'), name='password_change'),
     path('password_change/done/', auth_views.PasswordChangeDoneView.as_view(template_name='password_change_done.html'), name='password_change_done'),
+
+    path('schedule/', schedule_view, name='schedule'),
+    path('add-schedule/', views.add_schedule, name='add_schedule'),
 ]

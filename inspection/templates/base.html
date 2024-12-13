@@ -13,9 +13,12 @@
     <link href="{% static 'css/sb-admin-2.min.css' %}" rel="stylesheet">
     <link href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" rel="stylesheet">
 
+
     <!-- Include jQuery and DataTables -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar/index.global.min.js'></script>
+
 </head>
 
 <body id="page-top">
@@ -44,6 +47,12 @@
                     <span>Dashboard</span>
                 </a>
                 {% endif %}
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'schedule' %}">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Schedule</span>
+                </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'inspection_list' %}">
@@ -183,6 +192,44 @@
 
             deviceTypeField.addEventListener('change', toggleFields);
             toggleFields();  // Initial call
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const calendarEl = document.getElementById('calendar');
+    
+            const events = {{ events|safe }};
+    
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                events: events,
+                headerToolbar: {
+                    start: 'title',
+                    center: '',
+                    end: 'today,prev,next',
+                },
+                eventTimeFormat: {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    meridiem: false
+                },
+                eventColor: '#28a745',
+                eventContent: function(arg) {
+                    return {
+                        html: `
+                            <div style="font-size: 0.9rem;">
+                                <b>${arg.timeText}</b><br>
+                                <span style="font-size: 0.85rem;">${arg.event.title}</span>
+                            </div>
+                        `
+                    };
+                },
+                eventClick: function(info) {
+                    alert(`Event: ${info.event.title}\nFrom: ${info.event.start.toLocaleString()}\nTo: ${info.event.end.toLocaleString()}`);
+                }
+            });
+    
+            calendar.render();
         });
     </script>
 </body>

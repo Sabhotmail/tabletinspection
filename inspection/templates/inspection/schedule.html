@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h1 class="h3 mb-4 text-gray-800">Inspection Schedule</h1>
+
+    <!-- แสดงข้อมูลเวลาล่าสุด -->
+    {% if latest_schedule %}
+    <div class="alert alert-info">
+        <strong>Latest Schedule:</strong>
+        From <b>{{ latest_schedule.start_time|date:"Y-m-d H:i" }}</b> 
+        to <b>{{ latest_schedule.end_time|date:"Y-m-d H:i" }}</b>
+    </div>
+    {% endif %}
+
+    <!-- ตรวจสอบว่าผู้ใช้เป็น Admin -->
+    {% if request.user.is_superuser %}
+    <div class="text-end mb-3">
+        <a href="{% url 'add_schedule' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add Schedule
+        </a>
+    </div>
+    {% endif %}
+
+    <div id="calendar"></div>
+</div>
+
+
+{% endblock %}
