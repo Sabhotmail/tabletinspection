@@ -11,54 +11,67 @@
                 <div class="card-body">
                     <!-- Branch Information -->
                     <div class="mb-4">
-                        <h5 class="text-primary">Branch Information</h5>
-                        <p><strong>Branch:</strong> {{ inspection.branch }}</p>
-                        <p><strong>Saleman:</strong> {{ inspection.saleman }}</p>
+                        <h5 class="text-primary border-bottom pb-2">Branch Information</h5>
+                        <p><strong>Branch:</strong> {{ inspection.branch.branchname }}</p>
+                        <p><strong>Salesman:</strong> {{ inspection.salesman.salesmanname }}</p>
                     </div>
 
                     <!-- Device Information -->
                     <div class="mb-4">
-                        <h5 class="text-primary">Device Information</h5>
+                        <h5 class="text-primary border-bottom pb-2">Device Information</h5>
                         <p><strong>Device Type:</strong> {{ inspection.device_type }}</p>
                         <p><strong>Serial Number (SN):</strong> {{ inspection.sn }}</p>
                         <p><strong>Condition:</strong> {{ inspection.condition }}</p>
+                        <p><strong>Period:</strong> {{ inspection.period }}</p> <!-- เพิ่ม Period -->
                         {% if inspection.tablet_image %}
-                        <p><strong>Tablet Image:</strong></p>
-                        <img src="{{ inspection.tablet_image.url }}" class="img-fluid rounded" alt="Tablet Image">
+                        <div class="mb-3">
+                            <strong>Tablet Image:</strong>
+                            <img src="{{ inspection.tablet_image.url }}" class="img-fluid rounded shadow-sm mt-2" alt="Tablet Image">
+                        </div>
                         {% endif %}
                     </div>
 
                     <!-- Accessory Information -->
                     <div class="mb-4">
-                        <h5 class="text-primary">Accessory Information</h5>
+                        <h5 class="text-primary border-bottom pb-2">Accessory Information</h5>
+
+                        <!-- Tablet Charger -->
                         <p><strong>Tablet Charger Status:</strong> {{ inspection.charger_status_tablet }}</p>
                         {% if inspection.charger_image_tablet %}
-                        <p><strong>Tablet Charger Image:</strong></p>
-                        <img src="{{ inspection.charger_image_tablet.url }}" class="img-fluid rounded" alt="Tablet Charger Image">
+                        <div class="mb-3">
+                            <strong>Tablet Charger Image:</strong>
+                            <img src="{{ inspection.charger_image_tablet.url }}" class="img-fluid rounded shadow-sm mt-2" alt="Tablet Charger Image">
+                        </div>
                         {% endif %}
-                        
+
+                        <!-- Printer Charger -->
                         {% if inspection.device_type == "Printer" %}
                         <p><strong>Printer Charger Status:</strong> {{ inspection.charger_status_printer }}</p>
                         {% if inspection.charger_image_printer %}
-                        <p><strong>Printer Charger Image:</strong></p>
-                        <img src="{{ inspection.charger_image_printer.url }}" class="img-fluid rounded" alt="Printer Charger Image">
+                        <div class="mb-3">
+                            <strong>Printer Charger Image:</strong>
+                            <img src="{{ inspection.charger_image_printer.url }}" class="img-fluid rounded shadow-sm mt-2" alt="Printer Charger Image">
+                        </div>
                         {% endif %}
                         {% endif %}
-                        
+
+                        <!-- Bag -->
                         {% if inspection.device_type == "Tablet" %}
                         <p><strong>Bag Status:</strong> {{ inspection.bag_status }}</p>
                         {% if inspection.bag_image %}
-                        <p><strong>Bag Image:</strong></p>
-                        <img src="{{ inspection.bag_image.url }}" class="img-fluid rounded" alt="Bag Image">
+                        <div class="mb-3">
+                            <strong>Bag Image:</strong>
+                            <img src="{{ inspection.bag_image.url }}" class="img-fluid rounded shadow-sm mt-2" alt="Bag Image">
+                        </div>
                         {% endif %}
                         {% endif %}
                     </div>
 
                     <!-- Additional Information -->
                     <div class="mb-4">
-                        <h5 class="text-primary">Additional Information</h5>
+                        <h5 class="text-primary border-bottom pb-2">Additional Information</h5>
                         <p><strong>Remarks:</strong> {{ inspection.remarks }}</p>
-                        <p><strong>Inspected At:</strong> {{ inspection.inspected_at }}</p>
+                        <p><strong>Inspected At:</strong> {{ inspection.inspected_at|date:"Y-m-d H:i" }}</p>
                     </div>
 
                     <!-- Back Button -->

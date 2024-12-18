@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from .models import DeviceInspection, User, Branch, Saleman, InspectionSchedule
+from .models import DeviceInspection, User, Branch, Salesman, InspectionSchedule
 from django.core.exceptions import ValidationError
 
 class DeviceInspectionForm(forms.ModelForm):
@@ -8,7 +8,7 @@ class DeviceInspectionForm(forms.ModelForm):
         model = DeviceInspection
         fields = [
             'branch', 
-            'saleman', 
+            'salesman', 
             'device_type', 
             'sn', 
             'condition', 
@@ -30,10 +30,10 @@ class DeviceInspectionForm(forms.ModelForm):
         # Filter branch and saleman fields based on user
         if user and user.branch:
             self.fields['branch'].queryset = Branch.objects.filter(id=user.branch.id)
-            self.fields['saleman'].queryset = Saleman.objects.filter(branch=user.branch, status='active')
+            self.fields['salesman'].queryset = Salesman.objects.filter(branch=user.branch, status='active')
         else:
             self.fields['branch'].queryset = Branch.objects.none()
-            self.fields['saleman'].queryset = Saleman.objects.none()
+            self.fields['salesman'].queryset = Salesman.objects.none()
 
     def clean(self):
         cleaned_data = super().clean()
@@ -59,8 +59,23 @@ class CustomUserCreationForm(UserCreationForm):
 class InspectionScheduleForm(forms.ModelForm):
     class Meta:
         model = InspectionSchedule
-        fields = ['start_time', 'end_time']
+        fields = ['period', 'start_time', 'end_time', 'description']  # เพิ่มฟิลด์ 'period' และ 'description'
         widgets = {
-            'start_time': forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
-            'end_time': forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
+            'period': forms.TextInput(attrs={
+                'placeholder': 'YYYY-MM',
+                'class': 'form-control',
+            }),
+            'start_time': forms.DateTimeInput(attrs={
+                'type': 'datetime-local',
+                'class': 'form-control',
+            }),
+            'end_time': forms.DateTimeInput(attrs={
+                'type': 'datetime-local',
+                'class': 'form-control',
+            }),
+            'description': forms.Textarea(attrs={
+                'rows': 3,
+                'class': 'form-control',
+                'placeholder': 'Add a description for the schedule (optional)',
+            }),
         }

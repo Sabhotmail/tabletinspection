@@ -8,7 +8,15 @@
     <div class="alert alert-info">
         <strong>Latest Schedule:</strong>
         From <b>{{ latest_schedule.start_time|date:"Y-m-d H:i" }}</b> 
-        to <b>{{ latest_schedule.end_time|date:"Y-m-d H:i" }}</b>
+        to <b>{{ latest_schedule.end_time|date:"Y-m-d H:i" }}</b> 
+        (<strong>Period:</strong> {{ latest_schedule.period }}) 
+        <span class="badge 
+            {% if latest_schedule.status == 'active' %} bg-success 
+            {% elif latest_schedule.status == 'upcoming' %} bg-warning 
+            {% else %} bg-secondary 
+            {% endif %}">
+            {{ latest_schedule.get_status_display }}
+        </span>
     </div>
     {% endif %}
 
@@ -21,8 +29,7 @@
     </div>
     {% endif %}
 
+    <!-- ปฏิทิน -->
     <div id="calendar"></div>
 </div>
-
-
 {% endblock %}

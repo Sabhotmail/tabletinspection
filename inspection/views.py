@@ -3,15 +3,12 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView
-from .models import DeviceInspection,Saleman, Branch, InspectionSchedule
+from .models import DeviceInspection,Salesman, Branch, InspectionSchedule
 from .forms import DeviceInspectionForm, CustomUserCreationForm,InspectionScheduleForm
 from django.contrib import messages
 from django.db.models import Count, Q
 from django.db.models.functions import TruncDate
 from django.utils.timezone import now
-
-
-
 
 
 
@@ -47,13 +44,16 @@ def create_inspection(request):
         )
         return redirect('inspection_list')
 
-    # พิมพ์ Debug ตารางเวลา
-    print(f"Schedule found: Start - {schedule.start_time}, End - {schedule.end_time}")
+    # Debug ตารางเวลา
+    print(f"Schedule found: Start - {schedule.start_time}, End - {schedule.end_time}, Period - {schedule.period}")
 
     if request.method == 'POST':
         form = DeviceInspectionForm(request.POST, request.FILES, user=request.user)
         if form.is_valid():
-            form.save()
+            inspection = form.save(commit=False)
+            inspection.schedule = schedule  # เชื่อมโยง Schedule ปัจจุบัน
+            inspection.period = schedule.period  # เพิ่ม Period จาก Schedule
+            inspection.save()
             messages.success(request, "Inspection created successfully!")
             return redirect('inspection_list')
         else:
@@ -61,19 +61,7 @@ def create_inspection(request):
     else:
         form = DeviceInspectionForm(user=request.user)
 
-    return render(request, 'inspection/create_inspection.html', {'form': form, 'schedule': schedule })
-
-
-def register(request):
-    if request.method == 'POST':
-        form = CustomUserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            return redirect('login')  # เปลี่ยน URL ตามหน้าหลักของคุณ
-    else:
-        form = CustomUserCreationForm()
-    return render(request, 'register.html', {'form': form})
+    return render(request, 'inspection/create_inspection.html', {'form': form, 'schedule': schedule})
 
 @login_required
 def dashboard(request):
@@ -81,7 +69,7 @@ def dashboard(request):
     total_devices = DeviceInspection.objects.count()
     broken_devices = DeviceInspection.objects.filter(condition='ชำรุด').count()
     normal_devices = DeviceInspection.objects.filter(condition='ปกติ').count()
-    active_saleman = Saleman.objects.filter(status='active').count()
+    active_salesman = Salesman.objects.filter(status='active').count()
 
     # Branch-wise Statistics
     branch_stats = Branch.objects.annotate(
@@ -146,7 +134,7 @@ def dashboard(request):
         'total_devices': total_devices,
         'broken_devices': broken_devices,
         'normal_devices': normal_devices,
-        'active_saleman': active_saleman,
+        'active_salesman': active_salesman,
         'inspection_dates': inspection_dates,
         'inspection_counts': inspection_counts,
         'pie_data': pie_data,  # Pie chart data
@@ -176,19 +164,23 @@ def user_profile(request):
     return render(request, 'user_profile.html', {'user': request.user})
 
 def schedule_view(request):
+    from django.utils.timezone import localtime
+
     # ดึงข้อมูล Schedule ทั้งหมด
     schedules = InspectionSchedule.objects.all().order_by('-end_time')  # เรียงลำดับจากเวลาล่าสุด
     latest_schedule = schedules.first()  # ดึงตารางล่าสุด
 
     # แปลงข้อมูลเป็น JSON เพื่อส่งให้ JavaScript
     events = [
-    {
-        "title": f"{schedule.start_time.strftime('%H:%M')} - {schedule.end_time.strftime('%H:%M')}",
-        "start": schedule.start_time.isoformat(),
-        "end": schedule.end_time.isoformat(),
-        "description": f"Inspection from {schedule.start_time.strftime('%Y-%m-%d %H:%M')} to {schedule.end_time.strftime('%Y-%m-%d %H:%M')}"
-    }
-    for schedule in schedules
+        {
+            "title": f"{localtime(schedule.start_time).strftime('%H:%M')} - {localtime(schedule.end_time).strftime('%H:%M')}",
+            "start": schedule.start_time.isoformat(),
+            "end": schedule.end_time.isoformat(),
+            "period": schedule.period,  # เพิ่มข้อมูล period
+            "description": f"Inspection from {localtime(schedule.start_time).strftime('%Y-%m-%d %H:%M')} "
+                           f"to {localtime(schedule.end_time).strftime('%Y-%m-%d %H:%M')}"
+        }
+        for schedule in schedules
     ]
     context = {
         "events": events,
@@ -201,8 +193,12 @@ def add_schedule(request):
     if request.method == 'POST':
         form = InspectionScheduleForm(request.POST)
         if form.is_valid():
-            form.save()
+            schedule = form.save()
+            messages.success(request, f"Schedule for Period {schedule.period} added successfully!")
             return redirect('schedule')  # กลับไปยังหน้าปฏิทิน
+        else:
+            messages.error(request, "There was an error adding the schedule. Please check your input.")
     else:
         form = InspectionScheduleForm()
+
     return render(request, 'inspection/add_schedule.html', {'form': form})
