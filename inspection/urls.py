@@ -2,11 +2,11 @@ from django.urls import path
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth import views as auth_views
 from . import views
-from .views import delete_inspection, user_profile, schedule_view
+from .views import delete_inspection, user_profile, schedule_view,CustomLoginView, export_pdf, report_list
 
 
 urlpatterns = [
-    path('', LoginView.as_view(template_name='login.html'), name='login'),
+    path('', CustomLoginView.as_view(), name='login'),
     path('logout/', LogoutView.as_view(next_page='/'), name='logout'),
      # เส้นทางสำหรับการรีเซ็ตรหัสผ่าน
     path('password_reset/', auth_views.PasswordResetView.as_view(
@@ -31,4 +31,7 @@ urlpatterns = [
 
     path('schedule/', schedule_view, name='schedule'),
     path('add-schedule/', views.add_schedule, name='add_schedule'),
+    
+    path('reports/', report_list, name='report_list'),
+    path('reports/export/', export_pdf, name='export_pdf'),
 ]

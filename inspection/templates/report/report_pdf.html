@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Inspection Report</title>
+    <style>
+        body {
+            font-family: 'TH Sarabun New', sans-serif;
+            font-size: 16px;
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            word-wrap: break-word; /* บังคับให้ข้อความตัดบรรทัด */
+            table-layout: fixed; /* บังคับให้ตารางใช้ความกว้างคงที่ */
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .summary {
+            margin-bottom: 20px;
+        }
+        .summary h4 {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Inspection Report</h1>
+    <div class="summary">
+        <h4>Total Inspections: {{ total_inspections }}</h4>
+        <h4>Total Normal Devices: {{ total_normal }}</h4>
+        <h4>Total Broken Devices: {{ total_broken }}</h4>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Branch</th>
+                <th>Device Type</th>
+                <th>SN</th>
+                <th>Condition</th>
+                <th>Tablet Charger</th>
+                <th>Printer Charger</th>
+                <th>Bag Status</th>
+                <th>Inspection Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for inspection in inspections %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ inspection.branch.branchname }}</td>
+                <td>{{ inspection.device_type }}</td>
+                <td>{{ inspection.sn }}</td>
+                <td>{{ inspection.condition }}</td>
+                <td>{{ inspection.charger_status_tablet }}</td>
+                <td>{{ inspection.charger_status_printer }}</td>
+                <td>{{ inspection.bag_status }}</td>
+                <td>{{ inspection.inspected_at|date:"Y-m-d H:i" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

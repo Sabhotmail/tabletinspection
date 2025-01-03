@@ -5,120 +5,115 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Your application description">
+    <meta name="keywords" content="application, dashboard, inspection">
+    <meta name="author" content="Your Name">
     <title>SB Admin 2 - Base</title>
 
+    <!-- โหลด jQuery ก่อน -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- Custom fonts and styles -->
     <link href="{% static 'vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
     <link href="{% static 'css/sb-admin-2.min.css' %}" rel="stylesheet">
     <link href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" rel="stylesheet">
 
-
     <!-- Include jQuery and DataTables -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    <script src='https://cdn.jsdelivr.net/npm/fullcalendar/index.global.min.js'></script>
-
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar/index.global.min.js" defer></script>
 </head>
 
 <body id="page-top">
-
     <!-- Page Wrapper -->
     <div id="wrapper">
-
         <!-- Sidebar -->
         <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
-            <!-- Sidebar - Brand -->
             <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{% url 'inspection_list' %}">
                 <div class="sidebar-brand-icon">
                     <i class="fas fa-laugh-wink"></i>
                 </div>
                 <div class="sidebar-brand-text mx-3">My App</div>
             </a>
-
-            <!-- Divider -->
             <hr class="sidebar-divider my-0">
-
-            <!-- Menu Items -->
-            <li class="nav-item">
-                {% if request.user.is_superuser or request.user.is_staff %}
-                <a class="nav-link" href="{% url 'dashboard' %}">
-                    <i class="fas fa-fw fa-tachometer-alt"></i>
-                    <span>Dashboard</span>
-                </a>
+            {% if request.user.is_authenticated %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'dashboard' %}">
+                        <i class="fas fa-fw fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'schedule' %}">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>Schedule</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'inspection_list' %}">
+                        <i class="fas fa-solid fa-list"></i>
+                        <span>List Inspection</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'report_list' %}">
+                        <i class="fas fa-file-alt"></i>
+                        <span>Inspection Report</span>
+                    </a>
+                </li>
+                {% if active_schedule %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'create_inspection' %}">
+                        <i class="fas fa-plus-circle"></i>
+                        <span>Create Inspection</span>
+                    </a>
+                </li>
+                
                 {% endif %}
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'schedule' %}">
-                    <i class="fas fa-calendar-alt"></i>
-                    <span>Schedule</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'inspection_list' %}">
-                    <i class="fas fa-solid fa-list"></i>
-                    <span>List Inspection</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'create_inspection' %}">
-                    <i class="fas fa-plus-circle"></i>
-                    <span>Create Inspection</span>
-                </a>
-            </li>
+            {% endif %}
         </ul>
         <!-- End of Sidebar -->
-
-        <!-- Content Wrapper -->
         <div id="content-wrapper" class="d-flex flex-column">
-
             <!-- Main Content -->
             <div id="content">
-
                 <!-- Topbar -->
                 <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
                     <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
                         <i class="fa fa-bars"></i>
                     </button>
-
                     <ul class="navbar-nav ml-auto">
-                        <li class="nav-item dropdown no-arrow">
-                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">
-                                    {{ request.user.get_full_name|default:request.user.username }} - {{ request.user.branch.branchname|default:"Not Assigned" }} 
-                                </span>
-                                <img class="img-profile rounded-circle" src="{% static 'img/undraw_profile.svg' %}">
-                            </a>
-                            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
-                                <a class="dropdown-item" href="{% url 'user_profile' %}">
-                                    <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Profile
+                        {% if request.user.is_authenticated %}
+                            <li class="nav-item dropdown no-arrow">
+                                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <span class="mr-2 d-none d-lg-inline text-gray-600 small">
+                                        {{ request.user.get_full_name|default:request.user.username }} - {{ request.user.branch.branchname|default:"Not Assigned" }} 
+                                    </span>
+                                    <img class="img-profile rounded-circle" src="{% static 'img/undraw_profile.svg' %}">
                                 </a>
-                                <div class="dropdown-divider"></div>
-                                <form action="{% url 'logout' %}" method="post" style="display:inline;">
-                                    {% csrf_token %}
-                                    <button class="dropdown-item" type="submit">
-                                        <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
-                                        Logout
-                                    </button>
-                                </form>
-                            </div>
-                        </li>
+                                <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
+                                    <a class="dropdown-item" href="{% url 'user_profile' %}">
+                                        <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
+                                        Profile
+                                    </a>
+                                    <div class="dropdown-divider"></div>
+                                    <form action="{% url 'logout' %}" method="post" style="display:inline;">
+                                        {% csrf_token %}
+                                        <button class="dropdown-item" type="submit">
+                                            <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                                            Logout
+                                        </button>
+                                    </form>
+                                </div>
+                            </li>
+                        {% endif %}
                     </ul>
                 </nav>
                 <!-- End of Topbar -->
-
-                <!-- Page Content -->
                 <div class="container-fluid">
                     {% block content %}
                     <!-- Page-specific content goes here -->
                     {% endblock %}
                 </div>
-                <!-- End of Page Content -->
-
             </div>
-            <!-- End of Main Content -->
-
             <!-- Footer -->
             <footer class="sticky-footer bg-white">
                 <div class="container my-auto">
@@ -127,35 +122,16 @@
                     </div>
                 </div>
             </footer>
-            <!-- End of Footer -->
-
         </div>
-        <!-- End of Content Wrapper -->
-
     </div>
-    <!-- End of Page Wrapper -->
-
     <!-- Scroll to Top Button -->
     <a class="scroll-to-top rounded" href="#page-top">
         <i class="fas fa-angle-up"></i>
     </a>
-
     <!-- Additional Scripts -->
     <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
     <script src="{% static 'vendor/jquery-easing/jquery.easing.min.js' %}"></script>
     <script src="{% static 'js/sb-admin-2.min.js' %}"></script>
-    <script>
-        $(document).ready(function () {
-            console.log("Initializing DataTables...");
-            $('#inspectionTable').DataTable({
-                "pageLength": 10,
-                "lengthChange": true,
-                "ordering": true,
-                "searching": true,
-                "responsive": true
-            });
-        });
-    </script>
     <script>
         $(document).ready(function () {
             $('[data-toggle="tooltip"]').tooltip();
@@ -165,36 +141,26 @@
         function showLoading(button) {
             button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
             button.disabled = true;
-        }        
+        }
     </script>
-    
-    <!-- JavaScript -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const deviceTypeField = document.getElementById('id_device_type');
             const tabletFields = document.querySelectorAll('.tablet-only');
             const printerFields = document.querySelectorAll('.printer-only');
-
             function toggleFields() {
                 const isTablet = deviceTypeField.value === 'Tablet';
                 const isPrinter = deviceTypeField.value === 'Printer';
-
-                // Toggle visibility of tablet-related fields
-                tabletFields.forEach(field => {
-                    field.style.display = isTablet ? '' : 'none';
-                });
-
-                // Toggle visibility of printer-related fields
-                printerFields.forEach(field => {
-                    field.style.display = isPrinter ? '' : 'none';
-                });
+                tabletFields.forEach(field => field.style.display = isTablet ? '' : 'none');
+                printerFields.forEach(field => field.style.display = isPrinter ? '' : 'none');
             }
-
-            deviceTypeField.addEventListener('change', toggleFields);
-            toggleFields();  // Initial call
+            if (deviceTypeField) {
+                deviceTypeField.addEventListener('change', toggleFields);
+                toggleFields();
+            }
         });
     </script>
-    
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const calendarEl = document.getElementById('calendar');
@@ -236,7 +202,23 @@
         });
     </script>
 
-    
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            $('#inspectionTable').DataTable({
+                paging: true,
+                searching: true,
+                order: [[7, 'desc']],
+            });
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            $('#reportTable').DataTable({
+                paging: true,
+                searching: true,
+                order: [[9, 'desc']],
+            });
+        });
+    </script>
 </body>
-
 </html>

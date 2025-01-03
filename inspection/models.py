@@ -33,6 +33,9 @@ class Salesman(models.Model):
     class Meta:
         db_table = 'salesman'
 
+    def __str__(self):
+        return f"{self.salesmancode} - {self.salesmanname}"
+
 class DeviceInspection(models.Model):
     CONDITION_CHOICES = [
         ('ปกติ', 'ปกติ'),
@@ -42,7 +45,7 @@ class DeviceInspection(models.Model):
     branch = models.ForeignKey('Branch', on_delete=models.CASCADE)
     salesman = models.ForeignKey('Salesman', on_delete=models.SET_NULL, null=True, blank=True)
     device_type = models.CharField(max_length=50, choices=[('Tablet', 'Tablet'), ('Printer', 'Printer')])
-    sn = models.CharField(max_length=100, unique=True, blank=True, null=True)
+    sn = models.CharField(max_length=100, blank=True, null=True)  # ลบ unique=True
     condition = models.CharField(max_length=10, choices=CONDITION_CHOICES)
     remarks = models.TextField(blank=True, null=True)
     inspected_at = models.DateTimeField(auto_now_add=True)
@@ -82,6 +85,9 @@ class DeviceInspection(models.Model):
 
     class Meta:
         db_table = 'deviceinspection'
+        constraints = [
+            models.UniqueConstraint(fields=['sn', 'period'], name='unique_sn_period')
+        ]
 
 
 class InspectionSchedule(models.Model):

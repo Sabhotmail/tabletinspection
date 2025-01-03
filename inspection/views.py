@@ -9,18 +9,47 @@ from django.contrib import messages
 from django.db.models import Count, Q
 from django.db.models.functions import TruncDate
 from django.utils.timezone import now
+from django.contrib.auth.views import LoginView
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from weasyprint import HTML
 
 
+class CustomLoginView(LoginView):
+    template_name = 'login.html'  # ชื่อไฟล์ Template ที่ใช้แสดงหน้า Login
+
+    def form_invalid(self, form):
+        # เพิ่มข้อความแจ้งเตือนเมื่อ Login ไม่สำเร็จ
+        messages.error(self.request, "Invalid username or password. Please try again.")
+        return super().form_invalid(form)
 
 @login_required
 def inspection_list(request):
-    # ตรวจสอบว่าผู้ใช้เป็น admin หรือไม่
-    if request.user.is_superuser:  
-        inspections = DeviceInspection.objects.all()  # Admin เห็นข้อมูลทุกสาขา
+    # รับค่าจาก Query Parameter สำหรับ Period
+    selected_period = request.GET.get('period')
+
+     # ดึง branch ของ User ที่ล็อกอินอยู่
+    user_branch = request.user.branch if hasattr(request.user, 'branch') else None
+
+    # Query Inspections
+    if request.user.is_superuser:
+        inspections = DeviceInspection.objects.all()
     else:
-        inspections = DeviceInspection.objects.filter(branch=request.user.branch)  # ผู้ใช้ธรรมดาเห็นเฉพาะ branch ของตัวเอง
-    
-    return render(request, 'inspection/inspection_list.html', {'inspections': inspections})
+        inspections = DeviceInspection.objects.filter(branch=user_branch)
+
+    inspections = DeviceInspection.objects.filter(branch=user_branch)
+    if selected_period:
+        inspections = inspections.filter(period=selected_period)
+
+    # Query Periods ทั้งหมดจาก InspectionSchedule
+    all_periods = InspectionSchedule.objects.values_list('period', flat=True).distinct().order_by('period')
+
+    context = {
+        'inspections': inspections,
+        'all_periods': list(all_periods),  # ส่ง periods ทั้งหมดไปยัง template
+        'selected_period': selected_period,  # ส่ง period ที่เลือกไป template
+    }
+    return render(request, 'inspection/inspection_list.html', context)
 
 
 
@@ -50,6 +79,14 @@ def create_inspection(request):
     if request.method == 'POST':
         form = DeviceInspectionForm(request.POST, request.FILES, user=request.user)
         if form.is_valid():
+            # ตรวจสอบว่ามี sn และ period ซ้ำหรือไม่
+            sn = form.cleaned_data.get('sn')
+            period = schedule.period
+            if DeviceInspection.objects.filter(sn=sn, period=period).exists():
+                messages.error(request, f"SN '{sn}' already exists for the selected period '{period}'.")
+                return redirect('inspection_list')
+
+            # บันทึกข้อมูล
             inspection = form.save(commit=False)
             inspection.schedule = schedule  # เชื่อมโยง Schedule ปัจจุบัน
             inspection.period = schedule.period  # เพิ่ม Period จาก Schedule
@@ -62,6 +99,7 @@ def create_inspection(request):
         form = DeviceInspectionForm(user=request.user)
 
     return render(request, 'inspection/create_inspection.html', {'form': form, 'schedule': schedule})
+
 
 @login_required
 def dashboard(request):
@@ -147,12 +185,18 @@ def dashboard(request):
 @login_required
 def delete_inspection(request, inspection_id):
     inspection = get_object_or_404(DeviceInspection, id=inspection_id)
+
+    # ตรวจสอบสถานะของ schedule
+    if inspection.schedule.status == 'Closed':
+        messages.error(request, "You cannot delete an inspection from a closed period.")
+        return redirect('inspection_list')
+
     if request.method == 'POST':
         inspection.delete()
         messages.success(request, "Inspection deleted successfully!")
         return redirect('inspection_list')
-    return render(request, 'inspection/confirm_delete.html', {'inspection': inspection})
 
+    return redirect('inspection_list')
 
 @login_required
 def inspection_detail(request, pk):
@@ -202,3 +246,53 @@ def add_schedule(request):
         form = InspectionScheduleForm()
 
     return render(request, 'inspection/add_schedule.html', {'form': form})
+
+def update_schedule_status():
+    current_time = now()
+    schedules = InspectionSchedule.objects.filter(end_time__lte=current_time, status='active')
+    for schedule in schedules:
+        schedule.status = 'Closed'
+        schedule.save()
+
+def export_pdf(request):
+    # ดึงข้อมูลสำหรับรายงาน
+    inspections = DeviceInspection.objects.filter(branch=request.user.branch) if not request.user.is_superuser else DeviceInspection.objects.all()
+
+    # สร้าง Context สำหรับ Template
+    context = {
+        'inspections': inspections,
+        'total_inspections': inspections.count(),
+        'total_broken': inspections.filter(condition='ชำรุด').count(),
+        'total_normal': inspections.filter(condition='ปกติ').count(),
+    }
+
+    # Render HTML จาก Template
+    html_string = render_to_string('report/report_pdf.html', context)
+
+    # สร้าง PDF ด้วย WeasyPrint
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'inline; filename="inspection_report.pdf"'
+
+    HTML(string=html_string).write_pdf(response)
+    return response
+
+def report_list(request):
+    # ตรวจสอบสิทธิ์ของ User
+    if request.user.is_superuser:
+        inspections = DeviceInspection.objects.all()  # Admin เห็นข้อมูลทุก Branch
+    else:
+        user_branch = request.user.branch if hasattr(request.user, 'branch') else None
+        inspections = DeviceInspection.objects.filter(branch=user_branch)  # User เห็นเฉพาะ Branch ตัวเอง
+
+    # สรุปข้อมูล
+    total_inspections = inspections.count()
+    total_broken = inspections.filter(condition='ชำรุด').count()
+    total_normal = inspections.filter(condition='ปกติ').count()
+
+    context = {
+        'inspections': inspections,
+        'total_inspections': total_inspections,
+        'total_broken': total_broken,
+        'total_normal': total_normal,
+    }
+    return render(request, 'report/report_list.html', context)

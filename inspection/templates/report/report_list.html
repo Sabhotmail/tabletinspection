@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h1 class="h3 mb-4 text-gray-800">Inspection Reports</h1>
+
+    <!-- Summary Section -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5>Total Inspections</h5>
+                    <p class="h4">{{ total_inspections }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5>Total Normal Devices</h5>
+                    <p class="h4 text-success">{{ total_normal }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5>Total Broken Devices</h5>
+                    <p class="h4 text-danger">{{ total_broken }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Export Button -->
+    <div class="text-end mb-4">
+        <a href="{% url 'export_pdf' %}" class="btn btn-danger">
+            <i class="fas fa-file-pdf"></i> Export PDF
+        </a>
+    </div>
+
+    <!-- Inspection Records Table -->
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h6 class="m-0">
+                {% if request.user.is_superuser %}
+                Inspection Records for All Branches
+                {% else %}
+                Inspection Records for Branch: {{ request.user.branch.branchname|default:"Not Assigned" }}
+                {% endif %}
+            </h6>
+        </div>
+        <div class="card-body">
+            {% if inspections %}
+            <div class="table-responsive">
+                <table id="reportTable" class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Branch</th>
+                            <th>Salesman</th>
+                            <th>Device Type</th>
+                            <th>SN</th>
+                            <th>Condition</th>
+                            <th>Tablet Charger</th>
+                            <th>Printer Charger</th>
+                            <th>Bag Status</th>
+                            <th>Inspection Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for inspection in inspections %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ inspection.branch.branchname }}</td>
+                            <td>{{ inspection.saleman.salemanname }}</td>
+                            <td>{{ inspection.device_type }}</td>
+                            <td>{{ inspection.sn }}</td>
+                            <td>
+                                {% if inspection.condition == "ปกติ" %}
+                                    <span class="badge bg-success text-white">{{ inspection.condition }}</span>
+                                {% elif inspection.condition == "ชำรุด" %}
+                                    <span class="badge bg-danger text-white">{{ inspection.condition }}</span>
+                                {% else %}
+                                    <span class="badge bg-secondary text-white">{{ inspection.condition }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ inspection.charger_status_tablet }}</td>
+                            <td>{{ inspection.charger_status_printer }}</td>
+                            <td>{{ inspection.bag_status }}</td>
+                            <td>{{ inspection.inspected_at|date:"Y-m-d H:i" }}</td>
+                            <td>
+                                <a href="{% url 'inspection_detail' inspection.id %}" class="btn btn-info btn-sm">
+                                    <i class="fas fa-search"></i> View
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-warning" role="alert">
+                No inspection records found.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
