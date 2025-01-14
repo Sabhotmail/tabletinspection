@@ -40,6 +40,7 @@
                             <th>Condition</th>
                             <th>Period</th>
                             <th>Inspection Date</th>
+                            <th>View</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -53,6 +54,11 @@
                             <td>{{ inspection.condition }}</td>
                             <td>{{ inspection.schedule.period }}</td>
                             <td>{{ inspection.inspected_at|date:"Y-m-d H:i" }}</td>
+                            <td>
+                                <a href="{% url 'inspection_detail' inspection.id %}" class="btn btn-info btn-sm">
+                                    <i class="fas fa-search"></i> View
+                                </a>
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>

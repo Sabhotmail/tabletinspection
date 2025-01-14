@@ -21,9 +21,26 @@
     <!-- Include jQuery and DataTables -->
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar/index.global.min.js" defer></script>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- SweetAlert2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@10.16.7/dist/sweetalert2.min.css" rel="stylesheet">
 </head>
 
 <body id="page-top">
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Device Inspection System</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'inspections' %}">Inspections</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'schedules' %}">Schedules</a></li>
+            </ul>
+        </div>
+    </nav>
+
     <!-- Page Wrapper -->
     <div id="wrapper">
         <!-- Sidebar -->
@@ -32,7 +49,7 @@
                 <div class="sidebar-brand-icon">
                     <i class="fas fa-laugh-wink"></i>
                 </div>
-                <div class="sidebar-brand-text mx-3">My App</div>
+                <div class="sidebar-brand-text mx-3">Tablet Inspection</div>
             </a>
             <hr class="sidebar-divider my-0">
             {% if request.user.is_authenticated %}
@@ -54,12 +71,12 @@
                         <span>List Inspection</span>
                     </a>
                 </li>
-                <li class="nav-item">
+                {% comment %} <li class="nav-item">
                     <a class="nav-link" href="{% url 'report_list' %}">
                         <i class="fas fa-file-alt"></i>
                         <span>Inspection Report</span>
                     </a>
-                </li>
+                </li> {% endcomment %}
                 {% if active_schedule %}
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'create_inspection' %}">
@@ -220,5 +237,12 @@
             });
         });
     </script>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10.16.7/dist/sweetalert2.all.min.js"></script>
 </body>
 </html>
