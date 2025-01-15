@@ -1,0 +1,54 @@
+services:
+  web:
+    build: .
+    command: >
+      sh -c "while ! nc -z db 5432; do
+        echo 'Waiting for database...';
+        sleep 1;
+      done;
+      python manage.py migrate;
+      python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=True
+      - SECRET_KEY=django-insecure-va^87561k0qc32weo^@^1&e*gytr(h#1l(qzw9##_xaz8%sfv0
+      - DB_NAME=djangotablet
+      - DB_USER=djangotablet
+      - DB_PASSWORD=S1r1Pr0
+      - DB_HOST=db
+      - DB_PORT=5432
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  db:
+    image: postgres:13
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=djangotablet
+      - POSTGRES_USER=djangotablet
+      - POSTGRES_PASSWORD=S1r1Pr0
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U djangotablet"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  pgdata:

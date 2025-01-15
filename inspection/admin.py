@@ -66,3 +66,4 @@ class UserAdmin(DefaultUserAdmin):
 class InspectionScheduleAdmin(admin.ModelAdmin):
     list_display = ('start_time', 'end_time', 'description')
     list_filter = ('start_time', 'end_time')
+

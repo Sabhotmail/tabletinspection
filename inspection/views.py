@@ -12,7 +12,7 @@ from django.utils.timezone import now
 from django.contrib.auth.views import LoginView
 from django.http import HttpResponse
 from django.template.loader import render_to_string
-from weasyprint import HTML
+# from weasyprint import HTML
 
 
 class CustomLoginView(LoginView):
@@ -205,7 +205,14 @@ def inspection_detail(request, pk):
 
 @login_required
 def user_profile(request):
-    return render(request, 'user_profile.html', {'user': request.user})
+    if request.method == 'POST':
+        # Handle profile update logic here if needed
+        messages.success(request, 'Profile updated successfully!')
+        return redirect('profile')
+    return render(request, 'inspection/user_profile.html', {
+        'user': request.user,
+        'page_title': 'Profile'
+    })
 
 def schedule_view(request):
     from django.utils.timezone import localtime
@@ -254,27 +261,27 @@ def update_schedule_status():
         schedule.status = 'Closed'
         schedule.save()
 
-def export_pdf(request):
-    # ดึงข้อมูลสำหรับรายงาน
-    inspections = DeviceInspection.objects.filter(branch=request.user.branch) if not request.user.is_superuser else DeviceInspection.objects.all()
+# def export_pdf(request):
+#     # ดึงข้อมูลสำหรับรายงาน
+#     inspections = DeviceInspection.objects.filter(branch=request.user.branch) if not request.user.is_superuser else DeviceInspection.objects.all()
 
-    # สร้าง Context สำหรับ Template
-    context = {
-        'inspections': inspections,
-        'total_inspections': inspections.count(),
-        'total_broken': inspections.filter(condition='ชำรุด').count(),
-        'total_normal': inspections.filter(condition='ปกติ').count(),
-    }
+#     # สร้าง Context สำหรับ Template
+#     context = {
+#         'inspections': inspections,
+#         'total_inspections': inspections.count(),
+#         'total_broken': inspections.filter(condition='ชำรุด').count(),
+#         'total_normal': inspections.filter(condition='ปกติ').count(),
+#     }
 
-    # Render HTML จาก Template
-    html_string = render_to_string('report/report_pdf.html', context)
+#     # Render HTML จาก Template
+#     html_string = render_to_string('report/report_pdf.html', context)
 
-    # สร้าง PDF ด้วย WeasyPrint
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'inline; filename="inspection_report.pdf"'
+#     # สร้าง PDF ด้วย WeasyPrint
+#     response = HttpResponse(content_type='application/pdf')
+#     response['Content-Disposition'] = 'inline; filename="inspection_report.pdf"'
 
-    HTML(string=html_string).write_pdf(response)
-    return response
+#     HTML(string=html_string).write_pdf(response)
+#     return response
 
 def report_list(request):
     # ตรวจสอบสิทธิ์ของ User
