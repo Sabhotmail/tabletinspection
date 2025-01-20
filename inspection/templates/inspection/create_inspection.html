@@ -140,3 +140,23 @@
     </div>
 </div>
 {% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const deviceTypeField = document.getElementById('id_device_type');
+        const tabletFields = document.querySelectorAll('.tablet-only');
+        const printerFields = document.querySelectorAll('.printer-only');
+        function toggleFields() {
+            const isTablet = deviceTypeField.value === 'Tablet';
+            const isPrinter = deviceTypeField.value === 'Printer';
+            tabletFields.forEach(field => field.style.display = isTablet ? '' : 'none');
+            printerFields.forEach(field => field.style.display = isPrinter ? '' : 'none');
+        }
+        if (deviceTypeField) {
+            deviceTypeField.addEventListener('change', toggleFields);
+            toggleFields();
+        }
+    });
+</script>
+{% endblock %}

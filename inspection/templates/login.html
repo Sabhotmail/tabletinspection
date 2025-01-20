@@ -12,6 +12,7 @@
     <link href="{% static 'vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
     <link href="{% static 'css/sb-admin-2.min.css' %}" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body class="bg-gradient-primary">
@@ -19,17 +20,17 @@
     <div class="container">
 
         <!-- Alert Section -->
-        {% if messages %}
-            <div class="row justify-content-center mt-3">
-                <div class="col-lg-6">
-                    {% for message in messages %}
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            {{ message }}
-                        </div>
-                    {% endfor %}
-                </div>
-            </div>
-        {% endif %}
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                {% for message in messages %}
+                    Swal.fire({
+                        icon: "{% if message.tags == 'error' %}error{% elif message.tags == 'success' %}success{% else %}info{% endif %}",
+                        title: "{% if message.tags == 'error' %}Oops...{% elif message.tags == 'success' %}Success!{% else %}Notice{% endif %}",
+                        text: "{{ message|escapejs }}",
+                    });
+                {% endfor %}
+            });
+        </script>
 
         <!-- Outer Row -->
         <div class="row justify-content-center">

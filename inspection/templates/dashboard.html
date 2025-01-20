@@ -6,6 +6,15 @@
         <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
     </div>
 
+    
+
+    <!-- Alerts -->
+    {% if broken_devices > 10 %}
+    <div class="alert alert-danger">
+        <strong>Warning!</strong> Number of broken devices is unusually high: {{ broken_devices }}.
+    </div>
+    {% endif %}
+
     <!-- Statistics Row -->
     <div class="row">
         <!-- Total Devices -->
@@ -59,21 +68,28 @@
             </div>
         </div>
 
-        <!-- Active Salesmen -->
+        <!-- Devices Under Maintenance -->
         <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-info shadow h-100 py-2">
+            <div class="card border-left-warning shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Active Salesmen</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ active_salesman }}</div>
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Devices Under Maintenance</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ maintenance_devices }}</div>
                         </div>
                         <div class="col-auto">
-                            <i class="fas fa-users fa-2x text-gray-300"></i>
+                            <i class="fas fa-tools fa-2x text-gray-300"></i>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <input type="text" class="form-control" id="searchSalesman" placeholder="Search Salesman...">
         </div>
     </div>
 
@@ -131,8 +147,10 @@
         </div>
     </div>
 </div>
+{% endblock %}
 
-<!-- Chart Scripts -->
+{% block scripts %}
+    <!-- Chart Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     // Line Chart
@@ -188,5 +206,68 @@
             }
         }
     });
+
+    // Click Event for Branch Chart
+    branchChart.canvas.onclick = (event) => {
+        const points = branchChart.getElementsAtEventForMode(event, 'nearest', { intersect: true }, true);
+        if (points.length) {
+            const branch = branchChart.data.labels[points[0].index];
+            window.location.href = `/branch-details/${branch}`;
+        }
+    };
+
+    document.getElementById('applyFilter').addEventListener('click', () => {
+        const branch = document.getElementById('branchFilter').value;
+        const startDate = document.getElementById('dateFilterStart').value;
+        const endDate = document.getElementById('dateFilterEnd').value;
+    
+        // ส่งค่าที่ผู้ใช้เลือกไปยัง Backend ผ่าน AJAX (หรือ Fetch API)
+        fetch('/api/filter-data', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                branch: branch,
+                start_date: startDate,
+                end_date: endDate,
+            }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                // อัปเดตกราฟด้วยข้อมูลใหม่
+                updateCharts(data);
+            })
+            .catch(error => console.error('Error:', error));
+    });
+    
+    function updateCharts(data) {
+        // ตัวอย่างการอัปเดต Line Chart
+        lineChart.data.labels = data.inspection_dates;
+        lineChart.data.datasets[0].data = data.inspection_counts;
+        lineChart.update();
+    
+        // ตัวอย่างการอัปเดต Pie Chart
+        pieChart.data.labels = data.pie_data.labels;
+        pieChart.data.datasets[0].data = data.pie_data.data;
+        pieChart.update();
+    
+        // ตัวอย่างการอัปเดต Branch Chart
+        branchChart.data.labels = data.branch_chart_data.labels;
+        branchChart.data.datasets = data.branch_chart_data.datasets;
+        branchChart.update();
+    }
 </script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const sidebar = document.getElementById('accordionSidebar');
+        const sidebarToggle = document.getElementById('sidebarToggleTop');
+        
+        if (sidebar && sidebarToggle) {
+            sidebarToggle.addEventListener('click', function () {
+                sidebar.classList.toggle('toggled');
+            });
+        }
+    });
+</script>    
 {% endblock %}

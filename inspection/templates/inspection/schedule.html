@@ -33,3 +33,60 @@
     <div id="calendar"></div>
 </div>
 {% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const calendarEl = document.getElementById('calendar');
+        const events = {{ events|safe }};  // ดึงข้อมูล Event จาก Backend
+    
+        const calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            headerToolbar: {
+                start: 'title',
+                center: '',
+                end: 'today prev,next',
+            },
+            events: events,
+            eventTimeFormat: {
+                hour: '2-digit',
+                minute: '2-digit',
+                meridiem: false
+            },
+            eventClick: function(info) {
+                // แสดงรายละเอียด Event เมื่อคลิก
+                const startTime = new Date(info.event.start).toLocaleString('en-GB', { timeZone: 'Asia/Bangkok' });
+                const endTime = new Date(info.event.end).toLocaleString('en-GB', { timeZone: 'Asia/Bangkok' });
+                alert(`Period: ${info.event.extendedProps.period}\nFrom: ${startTime}\nTo: ${endTime}`);
+            },
+            eventContent: function(info) {
+                // ปรับข้อความที่แสดงในปฏิทิน
+                return { 
+                    html: `
+                        <div>
+                            <strong>Period: ${info.event.extendedProps.period || ''}</strong><br>
+                            ${info.event.title}
+                        </div>
+                    `
+                };
+            },
+        });
+    
+        calendar.render();
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const sidebar = document.getElementById('accordionSidebar');
+        const sidebarToggle = document.getElementById('sidebarToggleTop');
+        
+        if (sidebar && sidebarToggle) {
+            sidebarToggle.addEventListener('click', function () {
+                sidebar.classList.toggle('toggled');
+            });
+        }
+    });
+</script>   
+
+
+{% endblock %}

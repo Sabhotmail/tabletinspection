@@ -2,7 +2,7 @@ from django.urls import path
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth import views as auth_views
 from . import views
-from .views import delete_inspection, user_profile, schedule_view, CustomLoginView, report_list
+from .views import delete_inspection, user_profile, schedule_view, CustomLoginView, report_list, filter_data
 
 urlpatterns = [
     # Main URLs
@@ -12,6 +12,7 @@ urlpatterns = [
     path('detail/<int:pk>/', views.inspection_detail, name='inspection_detail'),
     path('delete/<int:inspection_id>/', delete_inspection, name='delete_inspection'),
     path('dashboard/', views.dashboard, name='dashboard'),  # เพิ่ม URL pattern สำหรับ dashboard
+    path('inspection/delete/<int:pk>/', views.inspection_delete, name='inspection_delete'),
     
     # Authentication URLs
     path('login/', CustomLoginView.as_view(template_name='login.html'), name='login'),
@@ -33,4 +34,6 @@ urlpatterns = [
     
     # Report URLs
     path('reports/', report_list, name='report_list'),
+
+    path('api/filter-data', views.filter_data, name='filter-data'),
 ]

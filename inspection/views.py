@@ -13,7 +13,7 @@ from django.contrib.auth.views import LoginView
 from django.http import HttpResponse
 from django.template.loader import render_to_string
 # from weasyprint import HTML
-
+from django.http import JsonResponse
 
 class CustomLoginView(LoginView):
     template_name = 'login.html'  # ชื่อไฟล์ Template ที่ใช้แสดงหน้า Login
@@ -184,6 +184,11 @@ def dashboard(request):
 
 @login_required
 def delete_inspection(request, inspection_id):
+    from django.contrib.auth.decorators import login_required
+    from django.shortcuts import get_object_or_404, redirect
+    from django.contrib import messages
+    from .models import DeviceInspection
+
     inspection = get_object_or_404(DeviceInspection, id=inspection_id)
 
     # ตรวจสอบสถานะของ schedule
@@ -303,3 +308,54 @@ def report_list(request):
         'total_normal': total_normal,
     }
     return render(request, 'report/report_list.html', context)
+
+@login_required
+def inspection_delete(request, pk):
+    inspection = get_object_or_404(DeviceInspection, pk=pk)
+    
+    # Optional: Add permission check
+    if request.method == 'POST':
+        # Check if the user has permission to delete
+        if request.user.is_staff or request.user == inspection.salesman.user:
+            inspection.delete()
+            messages.success(request, 'Inspection deleted successfully.')
+            return redirect('inspection_list')
+        else:
+            messages.error(request, 'You do not have permission to delete this inspection.')
+            return redirect('inspection_list')
+    
+    # If not a POST request, redirect back to list
+    return redirect('inspection_list')
+
+
+def filter_data(request):
+    if request.method == 'POST':
+        import json
+        data = json.loads(request.body)
+
+        # ดึงค่าจาก Request
+        branch = data.get('branch')
+        start_date = data.get('start_date')
+        end_date = data.get('end_date')
+
+        # กรองข้อมูลตามที่เลือก (ตัวอย่าง)
+        filtered_data = {
+            'inspection_dates': ['2025-01-01', '2025-01-02'],  # แทนที่ด้วยข้อมูลจริง
+            'inspection_counts': [5, 10],                      # แทนที่ด้วยข้อมูลจริง
+            'pie_data': {
+                'labels': ['Normal', 'Broken'],
+                'data': [80, 20],
+                'backgroundColor': ['#28a745', '#dc3545'],
+                'hoverBackgroundColor': ['#218838', '#c82333'],
+            },
+            'branch_chart_data': {
+                'labels': ['Branch A', 'Branch B'],
+                'datasets': [{
+                    'label': 'Devices',
+                    'data': [50, 30],
+                    'backgroundColor': ['#007bff', '#6610f2'],
+                }],
+            },
+        }
+
+        return JsonResponse(filtered_data)
