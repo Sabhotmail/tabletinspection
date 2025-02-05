@@ -1,273 +1,183 @@
 {% extends 'base.html' %}
+
 {% block content %}
 <div class="container-fluid">
-    <!-- Page Heading -->
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
-    </div>
+    <h1 class="h3 mb-4 text-gray-800">Dashboard</h1>
 
-    
-
-    <!-- Alerts -->
-    {% if broken_devices > 10 %}
-    <div class="alert alert-danger">
-        <strong>Warning!</strong> Number of broken devices is unusually high: {{ broken_devices }}.
-    </div>
-    {% endif %}
+        <!-- Period Filter -->
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <label for="period_filter">Select Period:</label>
+                <select id="period_filter" class="form-control" onchange="fetchDashboardData()">
+                    <option value="">-- Select Period --</option>
+                    {% for period in all_periods %}
+                    <option value="{{ period }}">{{ period }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
 
     <!-- Statistics Row -->
     <div class="row">
-        <!-- Total Devices -->
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-primary shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Devices</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_devices }}</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-tablet-alt fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="card shadow-lg border-0 rounded-lg">
+                <div class="card-header bg-primary text-white text-center font-weight-bold">Total Devices</div>
+                <div class="card-body text-center">
+                    <h3 class="text-primary font-weight-bold" id="total_devices">0</h3>
                 </div>
             </div>
         </div>
-
-        <!-- Normal Devices -->
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-success shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Normal Devices</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ normal_devices }}</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="card shadow-lg border-0 rounded-lg">
+                <div class="card-header bg-success text-white text-center font-weight-bold">Normal Devices</div>
+                <div class="card-body text-center">
+                    <h3 class="text-success font-weight-bold" id="normal_devices">0</h3>
                 </div>
             </div>
         </div>
-
-        <!-- Broken Devices -->
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-danger shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Broken Devices</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ broken_devices }}</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-times-circle fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="card shadow-lg border-0 rounded-lg">
+                <div class="card-header bg-danger text-white text-center font-weight-bold">Broken Devices</div>
+                <div class="card-body text-center">
+                    <h3 class="text-danger font-weight-bold" id="broken_devices">0</h3>
                 </div>
             </div>
         </div>
-
-        <!-- Devices Under Maintenance -->
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-warning shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Devices Under Maintenance</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ maintenance_devices }}</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-tools fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="card shadow-lg border-0 rounded-lg">
+                <div class="card-header bg-warning text-white text-center font-weight-bold">Active Salesman</div>
+                <div class="card-body text-center">
+                    <h3 class="text-warning font-weight-bold" id="active_salesman">0</h3>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- Search Bar -->
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <input type="text" class="form-control" id="searchSalesman" placeholder="Search Salesman...">
         </div>
     </div>
 
     <!-- Chart Row -->
-    <div class="row">
-        <!-- Line Chart -->
-        <div class="col-xl-8 col-lg-7">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Inspections Over Time</h6>
-                </div>
+    <div class="row mt-4">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0 rounded-lg">
+                <div class="card-header bg-info text-white font-weight-bold">Inspections Over Time</div>
                 <div class="card-body">
-                    <div class="chart-area">
-                        <canvas id="lineChart"></canvas>
-                    </div>
+                    <canvas id="lineChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card shadow-lg border-0 rounded-lg">
+                <div class="card-header bg-secondary text-white font-weight-bold">Device Status</div>
+                <div class="card-body">
+                    <canvas id="pieChart"></canvas>
                 </div>
             </div>
         </div>
 
-        <!-- Pie Chart -->
-        <div class="col-xl-4 col-lg-5">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Devices Status</h6>
-                </div>
+        {% if is_admin %}
+        <div class="col-md-12 mt-4">
+            <div class="card shadow-lg border-0 rounded-lg">
+                <div class="card-header bg-dark text-white font-weight-bold">Branch-wise Statistics</div>
                 <div class="card-body">
-                    <div class="chart-pie pt-4 pb-2">
-                        <canvas id="pieChart"></canvas>
-                    </div>
-                    <div class="mt-4 text-center small">
-                        <span class="mr-2">
-                            <i class="fas fa-circle text-success"></i> Normal
-                        </span>
-                        <span class="mr-2">
-                            <i class="fas fa-circle text-danger"></i> Broken
-                        </span>
-                    </div>
+                    <canvas id="branchChart"></canvas>
                 </div>
             </div>
         </div>
-    </div>
-
-    <div class="chart-container">
-        <div class="row">
-            <div class="col-xl-12 col-lg-12">
-                <div class="card shadow mb-4">
-                    <div class="card-header py-3">
-                        <h6 class="m-0 font-weight-bold text-primary">Branch-wise Statistics</h6>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="branchChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
-    <!-- Chart Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Line Chart
-    const lineCtx = document.getElementById('lineChart').getContext('2d');
-    const lineChart = new Chart(lineCtx, {
-        type: 'line',
-        data: {
-            labels: {{ inspection_dates|safe }},
-            datasets: [{
-                label: 'Inspections',
-                data: {{ inspection_counts|safe }},
-                borderColor: '#4e73df',
-                backgroundColor: 'rgba(78, 115, 223, 0.05)',
-                borderWidth: 2,
-                fill: true,
-            }]
-        },
-        options: {
-            scales: {
-                x: { title: { display: true, text: 'Date' } },
-                y: { title: { display: true, text: 'Count' } }
-            }
-        }
+    document.addEventListener("DOMContentLoaded", function () {
+        fetchDashboardData();
     });
 
-    // Pie Chart
-    const pieCtx = document.getElementById('pieChart').getContext('2d');
-    const pieChart = new Chart(pieCtx, {
-        type: 'pie',
-        data: {
-            labels: {{ pie_data.labels|safe }},
-            datasets: [{
-                data: {{ pie_data.data|safe }},
-                backgroundColor: {{ pie_data.backgroundColor|safe }},
-                hoverBackgroundColor: {{ pie_data.hoverBackgroundColor|safe }},
-            }]
-        }
-    });
-
-    // Branch Chart
-    const branchCtx = document.getElementById('branchChart').getContext('2d');
-    const branchChart = new Chart(branchCtx, {
-        type: 'bar',
-        data: {
-            labels: {{ branch_chart_data.labels|safe }},
-            datasets: {{ branch_chart_data.datasets|safe }}
-        },
-        options: {
-            responsive: true,
-            scales: {
-                x: { title: { display: true, text: 'Branch' } },
-                y: { title: { display: true, text: 'Device Count' } }
-            }
-        }
-    });
-
-    // Click Event for Branch Chart
-    branchChart.canvas.onclick = (event) => {
-        const points = branchChart.getElementsAtEventForMode(event, 'nearest', { intersect: true }, true);
-        if (points.length) {
-            const branch = branchChart.data.labels[points[0].index];
-            window.location.href = `/branch-details/${branch}`;
-        }
-    };
-
-    document.getElementById('applyFilter').addEventListener('click', () => {
-        const branch = document.getElementById('branchFilter').value;
-        const startDate = document.getElementById('dateFilterStart').value;
-        const endDate = document.getElementById('dateFilterEnd').value;
-    
-        // ส่งค่าที่ผู้ใช้เลือกไปยัง Backend ผ่าน AJAX (หรือ Fetch API)
-        fetch('/api/filter-data', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                branch: branch,
-                start_date: startDate,
-                end_date: endDate,
-            }),
-        })
+    function fetchDashboardData() {
+        fetch("{% url 'dashboard_data' %}")
             .then(response => response.json())
             .then(data => {
-                // อัปเดตกราฟด้วยข้อมูลใหม่
-                updateCharts(data);
+                // อัปเดตตัวเลขใน Dashboard
+                document.getElementById("total_devices").textContent = data.total_devices || 0;
+                document.getElementById("normal_devices").textContent = data.normal_devices || 0;
+                document.getElementById("broken_devices").textContent = data.broken_devices || 0;
+                document.getElementById("active_salesman").textContent = data.active_salesman || 0;
+
+                // อัปเดตกราฟ Line Chart
+                const lineChartCtx = document.getElementById("lineChart").getContext("2d");
+                new Chart(lineChartCtx, {
+                    type: "line",
+                    data: {
+                        labels: data.inspection_dates || [],
+                        datasets: [{
+                            label: "Inspections",
+                            data: data.inspection_counts || [],
+                            borderColor: "#4e73df",
+                            backgroundColor: "rgba(78, 115, 223, 0.1)",
+                            borderWidth: 2,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            x: { title: { display: true, text: 'Date' } },
+                            y: { title: { display: true, text: 'Count' } }
+                        }
+                    }
+                });
+
+                // อัปเดต Pie Chart
+                const pieChartCtx = document.getElementById("pieChart").getContext("2d");
+                new Chart(pieChartCtx, {
+                    type: "pie",
+                    data: {
+                        labels: data.pie_data.labels || ["ปกติ", "ชำรุด"],
+                        datasets: [{
+                            data: data.pie_data.data || [0, 0],
+                            backgroundColor: data.pie_data.backgroundColor || ['#28a745', '#dc3545'],
+                            hoverBackgroundColor: data.pie_data.hoverBackgroundColor || ['#218838', '#c82333']
+                        }]
+                    }
+                });
+
+                // อัปเดต Branch Chart (เฉพาะ Admin)
+                if (data.is_admin) {
+                    const branchChartCtx = document.getElementById("branchChart").getContext("2d");
+                    new Chart(branchChartCtx, {
+                        type: "bar",
+                        data: {
+                            labels: data.branch_chart_data.labels || [],
+                            datasets: data.branch_chart_data.datasets || []
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                x: { title: { display: true, text: 'Branch' } },
+                                y: { title: { display: true, text: 'Device Count' } }
+                            }
+                        }
+                    });
+                }
             })
-            .catch(error => console.error('Error:', error));
-    });
-    
-    function updateCharts(data) {
-        // ตัวอย่างการอัปเดต Line Chart
-        lineChart.data.labels = data.inspection_dates;
-        lineChart.data.datasets[0].data = data.inspection_counts;
-        lineChart.update();
-    
-        // ตัวอย่างการอัปเดต Pie Chart
-        pieChart.data.labels = data.pie_data.labels;
-        pieChart.data.datasets[0].data = data.pie_data.data;
-        pieChart.update();
-    
-        // ตัวอย่างการอัปเดต Branch Chart
-        branchChart.data.labels = data.branch_chart_data.labels;
-        branchChart.data.datasets = data.branch_chart_data.datasets;
-        branchChart.update();
+            .catch(error => {
+                console.error("Error loading dashboard data:", error);
+            });
     }
 </script>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const sidebar = document.getElementById('accordionSidebar');
-        const sidebarToggle = document.getElementById('sidebarToggleTop');
-        
-        if (sidebar && sidebarToggle) {
-            sidebarToggle.addEventListener('click', function () {
-                sidebar.classList.toggle('toggled');
-            });
-        }
-    });
-</script>    
+
+<style>
+    .card {
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+    .card:hover {
+        transform: scale(1.05);
+        box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
+    }
+    h3 {
+        margin: 0;
+        font-size: 2rem;
+    }
+</style>
 {% endblock %}

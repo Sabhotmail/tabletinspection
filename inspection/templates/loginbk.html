@@ -37,28 +37,26 @@
 
             <div class="col-xl-10 col-lg-12 col-md-9">
 
+
+
                 <div class="card o-hidden border-0 shadow-lg my-5">
                     <div class="card-body p-0">
                         <!-- Nested Row within Card Body -->
                         <div class="row">
-                            <!-- คอลัมน์ซ้ายสำหรับโลโก้ -->
-                            <div class="col-lg-6 d-flex align-items-center justify-content-center">
-                                <img src="{% static 'img/logo.jpg' %}" alt="Logo" class="img-fluid" style="max-width: 80%;">
-                            </div>
-
-                            <!-- คอลัมน์ขวาสำหรับฟอร์ม Login -->
+                            <div class="col-lg-6 d-none d-lg-block bg-login-image"></div>
                             <div class="col-lg-6">
+                                <img src="{% static 'img/1738741885028.jpg' %}" alt="Logo" class="img-fluid" style="max-width: 80%;">
                                 <div class="p-5">
                                     <div class="text-center">
-                                        <h1 class="h4 text-gray-900 mb-4"> Welcome To Tablet Inspection</h1>
+                                        <h1 class="h4 text-gray-900 mb-4">Welcome Back!</h1>
                                     </div>
                                     <form method="post" class="user">
                                         {% csrf_token %}
                                         <div class="form-group">
-                                            {{ form.username|add_class:"form-control form-control-user" | attr:"placeholder:Enter Username" }}
+                                            {{ form.username|add_class:"form-control form-control-user" }}
                                         </div>
                                         <div class="form-group">
-                                            {{ form.password|add_class:"form-control form-control-user" | attr:"placeholder:Enter Password" }}
+                                            {{ form.password|add_class:"form-control form-control-user" }}
                                         </div>
                                         <button type="submit" class="btn btn-primary btn-user btn-block">
                                             Login
@@ -68,10 +66,12 @@
                                     <div class="text-center">
                                         <a class="small" href="{% url 'password_reset' %}">Forgot Password?</a>
                                     </div>
+                                    {% comment %} <div class="text-center">
+                                        <a class="small" href="{% url 'register' %}">Create an Account!</a>
+                                    </div> {% endcomment %}
                                 </div>
-                            </div> <!-- คอลัมน์ขวา -->
-
-                        </div> <!-- row -->
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -80,7 +80,6 @@
         </div>
 
     </div>
-
     <!-- Bootstrap core JavaScript-->
     <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
     <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>

@@ -40,6 +40,7 @@ class DeviceInspection(models.Model):
     CONDITION_CHOICES = [
         ('ปกติ', 'ปกติ'),
         ('ชำรุด', 'ชำรุด'),
+        ('ศูนย์หาย', 'ศูนย์หาย')
     ]
     
     branch = models.ForeignKey('Branch', on_delete=models.CASCADE)

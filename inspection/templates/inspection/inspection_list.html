@@ -3,10 +3,24 @@
 <div class="container mt-5">
     <h1 class="h3 mb-4 text-gray-800">Inspection List</h1>
 
-    <!-- Period Filter -->
-    <form method="post" class="mb-4">
-        {% csrf_token %}
+    <!-- Period & Branch Filter -->
+    <form method="get" class="mb-4">
         <div class="row">
+            <!-- Branch Filter (Only for Admin) -->
+            {% if request.user.is_staff %}
+            <div class="col-12 col-sm-6 col-md-4 mb-3">
+                <select name="branch" class="form-control">
+                    <option value="">-- All Branches --</option>
+                    {% for branch in all_branches %}
+                        <option value="{{ branch }}" {% if branch == selected_branch %}selected{% endif %}>
+                            {{ branch }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+
+            <!-- Period Filter -->
             <div class="col-12 col-sm-6 col-md-4 mb-3">
                 <select name="period" class="form-control">
                     <option value="">-- All Periods --</option>
@@ -17,12 +31,13 @@
                     {% endfor %}
                 </select>
             </div>
+
             <div class="col-12 col-sm-6 col-md-2">
                 <button type="submit" class="btn btn-primary w-100">Filter</button>
             </div>
         </div>
     </form>
-
+    
     <!-- No Data Found Alert -->
     {% if inspections|length == 0 %}
         <div class="alert alert-warning text-center">No inspection records found for the selected period.</div>

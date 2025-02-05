@@ -12,6 +12,7 @@ urlpatterns = [
     path('detail/<int:pk>/', views.inspection_detail, name='inspection_detail'),
     path('delete/<int:inspection_id>/', delete_inspection, name='delete_inspection'),
     path('dashboard/', views.dashboard, name='dashboard'),  # เพิ่ม URL pattern สำหรับ dashboard
+    path('dashboard_data/', views.dashboard_data, name='dashboard_data'),
     path('inspection/delete/<int:pk>/', views.inspection_delete, name='inspection_delete'),
     
     # Authentication URLs

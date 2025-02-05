@@ -23,34 +23,46 @@ class CustomLoginView(LoginView):
         messages.error(self.request, "Invalid username or password. Please try again.")
         return super().form_invalid(form)
 
+# 
 @login_required
 def inspection_list(request):
-    # รับค่าจาก Query Parameter สำหรับ Period
+    # รับค่าจาก Query Parameters
     selected_period = request.GET.get('period')
+    selected_branch_code = request.GET.get('branch')  # รับค่า branch (เป็น branchcode)
 
-     # ดึง branch ของ User ที่ล็อกอินอยู่
+    # ดึง branch ของ User ที่ล็อกอินอยู่
     user_branch = request.user.branch if hasattr(request.user, 'branch') else None
 
     # Query Inspections
-    if request.user.is_superuser:
-        inspections = DeviceInspection.objects.all()
+    if request.user.is_staff:
+        inspections = DeviceInspection.objects.all()  # Admin เห็นทุกสาขา
     else:
-        inspections = DeviceInspection.objects.filter(branch=user_branch)
+        inspections = DeviceInspection.objects.filter(branch=user_branch)  # จำกัดให้เห็นเฉพาะ branch ของตัวเอง
 
-    inspections = DeviceInspection.objects.filter(branch=user_branch)
+    # ค้นหา ID ของสาขาที่เลือก
+    if request.user.is_staff and selected_branch_code:
+        branch_obj = Branch.objects.filter(branchcode=selected_branch_code).first()
+        if branch_obj:
+            inspections = inspections.filter(branch=branch_obj.id)  # ใช้ ID ของ Branch ในการกรอง
+
+    # กรองตาม period ถ้ามีการเลือก
     if selected_period:
         inspections = inspections.filter(period=selected_period)
 
-    # Query Periods ทั้งหมดจาก InspectionSchedule
+    # ดึงรายชื่อสาขาทั้งหมด (สำหรับ Admin)
+    all_branches = Branch.objects.values_list('branchcode', flat=True).distinct().order_by('branchcode')
+
+    # ดึงรายชื่อ periods ทั้งหมด
     all_periods = InspectionSchedule.objects.values_list('period', flat=True).distinct().order_by('period')
 
     context = {
         'inspections': inspections,
+        'all_branches': list(all_branches),  # ส่งรายชื่อสาขาทั้งหมดไปยัง template
         'all_periods': list(all_periods),  # ส่ง periods ทั้งหมดไปยัง template
-        'selected_period': selected_period,  # ส่ง period ที่เลือกไป template
+        'selected_period': selected_period,  # ส่งค่า period ที่เลือก
+        'selected_branch': selected_branch_code,  # ส่งค่า branch ที่เลือก
     }
     return render(request, 'inspection/inspection_list.html', context)
-
 
 
 @login_required
@@ -103,83 +115,87 @@ def create_inspection(request):
 
 @login_required
 def dashboard(request):
-    # Statistics
-    total_devices = DeviceInspection.objects.count()
-    broken_devices = DeviceInspection.objects.filter(condition='ชำรุด').count()
-    normal_devices = DeviceInspection.objects.filter(condition='ปกติ').count()
-    active_salesman = Salesman.objects.filter(status='active').count()
+    """ แสดงหน้า Dashboard หลัก """
+    all_periods = InspectionSchedule.objects.values_list('period', flat=True).distinct().order_by('period')
+    return render(request, 'dashboard.html', {'is_admin': request.user.is_staff, 'all_periods': all_periods})
 
-    # Branch-wise Statistics
-    branch_stats = Branch.objects.annotate(
-        total_devices=Count('deviceinspection'),
-        broken_devices=Count('deviceinspection', filter=Q(deviceinspection__condition='ชำรุด')),
-        normal_devices=Count('deviceinspection', filter=Q(deviceinspection__condition='ปกติ'))
+@login_required
+def dashboard_data(request):
+    """ API สำหรับดึงข้อมูล Dashboard """
+    user_branch = request.user.branch if hasattr(request.user, 'branch') else None
+
+    # ดึงข้อมูล Inspection ตามสิทธิ์ของ User
+    if request.user.is_staff:
+        inspections = DeviceInspection.objects.all()
+        branch_stats = Branch.objects.annotate(
+            total_devices=Count('deviceinspection'),
+            broken_devices=Count('deviceinspection', filter=Q(deviceinspection__condition='ชำรุด')),
+            normal_devices=Count('deviceinspection', filter=Q(deviceinspection__condition='ปกติ'))
+        )
+    else:
+        inspections = DeviceInspection.objects.filter(branch=user_branch)
+        branch_stats = Branch.objects.filter(id=user_branch.id).annotate(
+            total_devices=Count('deviceinspection'),
+            broken_devices=Count('deviceinspection', filter=Q(deviceinspection__condition='ชำรุด')),
+            normal_devices=Count('deviceinspection', filter=Q(deviceinspection__condition='ปกติ'))
+        )
+
+    device_stats = inspections.aggregate(
+        total_devices=Count('id'),
+        broken_devices=Count('id', filter=Q(condition='ชำรุด')),
+        normal_devices=Count('id', filter=Q(condition='ปกติ'))
     )
 
-    # Inspections Over Time
-    inspections = (
-        DeviceInspection.objects.annotate(day=TruncDate('inspected_at'))
-        .values('day')
-        .annotate(count=Count('id'))
-        .order_by('day')
-    )
+    active_salesman = Salesman.objects.filter(
+        status='active', branch=user_branch if not request.user.is_staff else None
+    ).count()
 
-    inspection_dates = [inspection['day'].strftime('%Y-%m-%d') for inspection in inspections]
-    inspection_counts = [inspection['count'] for inspection in inspections]
+    inspections_over_time = inspections.annotate(day=TruncDate('inspected_at')).values('day').annotate(count=Count('id')).order_by('day')
 
-    # Prepare Pie Chart Data
-    pie_data = {
-        'labels': ['Normal', 'Broken'],
-        'data': [normal_devices, broken_devices],
-        'backgroundColor': ['#28a745', '#dc3545'],
-        'hoverBackgroundColor': ['#218838', '#c82333']
-    }
-
-    # Prepare Branch Statistics for Chart
-    branch_names = [branch.branchname for branch in branch_stats]
-    total_devices_list = [branch.total_devices for branch in branch_stats]
-    normal_devices_list = [branch.normal_devices for branch in branch_stats]
-    broken_devices_list = [branch.broken_devices for branch in branch_stats]
-
-    branch_chart_data = {
-        'labels': branch_names,
-        'datasets': [
-            {
-                'label': 'Total Devices',
-                'data': total_devices_list,
-                'backgroundColor': 'rgba(78, 115, 223, 0.5)',
-                'borderColor': 'rgba(78, 115, 223, 1)',
-                'borderWidth': 1
-            },
-            {
-                'label': 'Normal Devices',
-                'data': normal_devices_list,
-                'backgroundColor': 'rgba(40, 167, 69, 0.5)',
-                'borderColor': 'rgba(40, 167, 69, 1)',
-                'borderWidth': 1
-            },
-            {
-                'label': 'Broken Devices',
-                'data': broken_devices_list,
-                'backgroundColor': 'rgba(220, 53, 69, 0.5)',
-                'borderColor': 'rgba(220, 53, 69, 1)',
-                'borderWidth': 1
-            }
-        ]
-    }
-
-    context = {
-        'total_devices': total_devices,
-        'broken_devices': broken_devices,
-        'normal_devices': normal_devices,
+    response_data = {
+        'total_devices': device_stats['total_devices'],
+        'broken_devices': device_stats['broken_devices'],
+        'normal_devices': device_stats['normal_devices'],
         'active_salesman': active_salesman,
-        'inspection_dates': inspection_dates,
-        'inspection_counts': inspection_counts,
-        'pie_data': pie_data,  # Pie chart data
-        'branch_chart_data': branch_chart_data,  # Branch statistics chart data
-        'branch_stats': branch_stats,
+        'inspection_dates': [entry['day'].strftime('%Y-%m-%d') for entry in inspections_over_time],
+        'inspection_counts': [entry['count'] for entry in inspections_over_time],
+        'pie_data': {
+            'labels': ['ปกติ', 'ชำรุด'],
+            'data': [device_stats['normal_devices'], device_stats['broken_devices']],
+            'backgroundColor': ['#28a745', '#dc3545'],
+            'hoverBackgroundColor': ['#218838', '#c82333']
+        },
+        'is_admin': request.user.is_staff,
+        'branch_chart_data': {
+            'labels': [b.branchname for b in branch_stats] if branch_stats else [],
+            'datasets': [
+                {
+                    'label': 'Total Devices',
+                    'data': [b.total_devices for b in branch_stats] if branch_stats else [],
+                    'backgroundColor': 'rgba(78, 115, 223, 0.5)',
+                    'borderColor': 'rgba(78, 115, 223, 1)',
+                    'borderWidth': 1
+                },
+                {
+                    'label': 'ปกติ',
+                    'data': [b.normal_devices for b in branch_stats] if branch_stats else [],
+                    'backgroundColor': 'rgba(40, 167, 69, 0.5)',
+                    'borderColor': 'rgba(40, 167, 69, 1)',
+                    'borderWidth': 1
+                },
+                {
+                    'label': 'ชำรุด',
+                    'data': [b.broken_devices for b in branch_stats] if branch_stats else [],
+                    'backgroundColor': 'rgba(220, 53, 69, 0.5)',
+                    'borderColor': 'rgba(220, 53, 69, 1)',
+                    'borderWidth': 1
+                }
+            ]
+        } if request.user.is_staff else None
     }
-    return render(request, 'dashboard.html', context)
+
+    return JsonResponse(response_data)
+
 
 
 @login_required
@@ -316,7 +332,8 @@ def inspection_delete(request, pk):
     # Optional: Add permission check
     if request.method == 'POST':
         # Check if the user has permission to delete
-        if request.user.is_staff or request.user == inspection.salesman.user:
+        # if request.user.is_staff or request.user == inspection.salesman.user:
+        if request.user.is_active:
             inspection.delete()
             messages.success(request, 'Inspection deleted successfully.')
             return redirect('inspection_list')
